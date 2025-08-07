@@ -17,6 +17,11 @@ body {
     overflow-x: hidden;
 }
 
+.container {
+    position: relative;
+    z-index: 10;
+}
+
 /* Futuristic Background System */
 .bg-decoration {
     position: fixed;
@@ -25,7 +30,7 @@ body {
     width: 100%;
     height: 100%;
     pointer-events: none;
-    z-index: -1;
+    z-index: 1;
     overflow: hidden;
 }
 
@@ -41,7 +46,7 @@ body {
     position: absolute;
     width: 100%;
     height: 100%;
-    opacity: 0.1;
+    opacity: 0.03;
 }
 
 .grid-line {
@@ -75,7 +80,7 @@ body {
 
 .wave {
     position: absolute;
-    border: 2px solid rgba(0, 255, 255, 0.3);
+    border: 2px solid rgba(0, 255, 255, 0.1);
     border-radius: 50%;
     animation: energy-wave 8s ease-out infinite;
 }
@@ -172,6 +177,24 @@ body {
 .hero-section {
     margin-bottom: 4rem !important;
     position: relative;
+    z-index: 10;
+}
+
+.hero-title {
+    position: relative;
+    z-index: 10;
+    margin-bottom: 2rem;
+}
+
+.hero-subtitle {
+    position: relative;
+    z-index: 10;
+    margin-bottom: 2rem;
+}
+
+.hero-features {
+    position: relative;
+    z-index: 10;
 }
 
 .hero-icon-wrapper {
@@ -306,6 +329,8 @@ body {
         0 0 15px #00ffff,
         0 0 20px #00ffff;
     animation: neon-glow 2s ease-in-out infinite alternate;
+    position: relative;
+    z-index: 10;
 }
 
 @keyframes neon-glow {
@@ -380,6 +405,8 @@ body {
     font-family: 'Courier New', monospace;
     text-transform: uppercase;
     letter-spacing: 1px;
+    position: relative;
+    z-index: 10;
 }
 
 /* Cyber Badges */
@@ -433,6 +460,13 @@ body {
         inset 0 1px 0 rgba(0, 255, 255, 0.1) !important;
     position: relative;
     overflow: hidden;
+    z-index: 5;
+}
+
+.section-title {
+    position: relative;
+    z-index: 10;
+    color: #00ffff !important;
 }
 
 .cyber-frame {

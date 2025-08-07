@@ -65,20 +65,21 @@ class EmailWise {
         const particlesContainer = document.getElementById('particles');
         if (!particlesContainer) return;
 
-        // Create floating particles
-        for (let i = 0; i < 50; i++) {
+        // Create fewer, more subtle particles
+        for (let i = 0; i < 15; i++) {
             const particle = document.createElement('div');
             particle.className = 'particle';
             particle.style.left = Math.random() * 100 + '%';
             particle.style.animationDelay = Math.random() * 15 + 's';
-            particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+            particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
+            particle.style.opacity = '0.3';
             particlesContainer.appendChild(particle);
         }
     }
 
     initializeCyberEffects() {
-        // Initialize typing effect for cyber text elements
-        this.initializeTypingEffect();
+        // Skip typing effect for main title to keep it visible
+        // this.initializeTypingEffect();
         
         // Initialize matrix rain effect
         this.initializeMatrixRain();
