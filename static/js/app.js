@@ -106,23 +106,34 @@ class EmailWise {
     }
 
     initializeMatrixRain() {
-        // Add subtle matrix-like effect to certain areas
+        // Optimized matrix effect with performance considerations
         const matrices = document.querySelectorAll('.data-stream');
         matrices.forEach(matrix => {
-            setInterval(() => {
-                const char = String.fromCharCode(0x30A0 + Math.random() * 96);
+            let matrixInterval = setInterval(() => {
+                // Limit concurrent elements to prevent memory issues
+                if (matrix.children.length > 3) return;
+                
+                const char = String.fromCharCode(0x2591 + Math.random() * 3); // Use block characters
                 const span = document.createElement('span');
                 span.textContent = char;
-                span.style.position = 'absolute';
-                span.style.color = 'rgba(0, 255, 255, 0.1)';
-                span.style.fontSize = '8px';
-                span.style.animation = 'matrix-fall 2s linear forwards';
+                span.style.cssText = `
+                    position: absolute;
+                    color: rgba(0, 255, 255, 0.15);
+                    font-size: 8px;
+                    animation: matrix-fall 3s linear forwards;
+                    will-change: transform, opacity;
+                `;
                 matrix.appendChild(span);
                 
                 setTimeout(() => {
                     if (span.parentNode) span.parentNode.removeChild(span);
-                }, 2000);
-            }, 200);
+                }, 3000);
+            }, 500); // Slower interval for better performance
+            
+            // Clean up on page unload
+            window.addEventListener('beforeunload', () => {
+                clearInterval(matrixInterval);
+            });
         });
     }
 
@@ -137,7 +148,9 @@ class EmailWise {
 
     createButtonParticles(button) {
         const rect = button.getBoundingClientRect();
-        for (let i = 0; i < 5; i++) {
+        const fragment = document.createDocumentFragment();
+        
+        for (let i = 0; i < 3; i++) { // Reduced particles for performance
             const particle = document.createElement('div');
             particle.style.cssText = `
                 position: fixed;
@@ -149,14 +162,33 @@ class EmailWise {
                 z-index: 9999;
                 left: ${rect.left + Math.random() * rect.width}px;
                 top: ${rect.top + Math.random() * rect.height}px;
-                animation: explode-particle 0.8s ease-out forwards;
+                animation: explode-particle 0.6s ease-out forwards;
+                will-change: transform, opacity;
             `;
-            document.body.appendChild(particle);
-            
-            setTimeout(() => {
-                if (particle.parentNode) particle.parentNode.removeChild(particle);
-            }, 800);
+            fragment.appendChild(particle);
         }
+        
+        document.body.appendChild(fragment);
+        
+        // Cleanup with single timeout
+        setTimeout(() => {
+            document.querySelectorAll('[style*="explode-particle"]').forEach(p => {
+                if (p.parentNode) p.parentNode.removeChild(p);
+            });
+        }, 600);
+    }
+
+    // Enhanced debounced resize handler
+    debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
     }
 
     attachEventListeners() {
@@ -694,7 +726,8 @@ class EmailWise {
     autoResizeTextarea() {
         const textarea = this.emailContent;
         textarea.style.height = 'auto';
-        textarea.style.height = Math.max(200, textarea.scrollHeight) + 'px';
+        const newHeight = Math.max(200, Math.min(textarea.scrollHeight, 400));
+        textarea.style.height = newHeight + 'px';
     }
 
     escapeHtml(text) {

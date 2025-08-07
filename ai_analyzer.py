@@ -33,9 +33,9 @@ class EmailAnalyzer:
     def _analyze_with_openai(self, email_content):
         """Analyze email using OpenAI GPT-4o"""
         try:
-            # Check if openai_client is available
+            # Check if openai_client is available  
             if not self.openai_client:
-                raise Exception("OpenAI client not initialized")
+                return self._analyze_locally(email_content)
                 
             prompt = f"""
             Please analyze the following email and extract:
@@ -87,16 +87,28 @@ class EmailAnalyzer:
             }
             
         except Exception as e:
-            # Fallback to local analysis if OpenAI fails
-            return self._analyze_locally(email_content)
+            # Enhanced error handling with specific fallback for rate limits
+            error_msg = str(e).lower()
+            if "429" in error_msg or "rate limit" in error_msg:
+                # Rate limit hit - use local analysis
+                return self._analyze_locally(email_content, fallback_reason="API rate limit exceeded")
+            elif "401" in error_msg or "unauthorized" in error_msg:
+                return self._analyze_locally(email_content, fallback_reason="API authentication failed")
+            else:
+                # General error - use local analysis
+                return self._analyze_locally(email_content, fallback_reason="API temporarily unavailable")
     
-    def _analyze_locally(self, email_content):
+    def _analyze_locally(self, email_content, fallback_reason=None):
         """Local fallback analysis using regex and keyword matching"""
         try:
             # Simple local analysis using patterns and keywords
             summary = self._extract_local_summary(email_content)
             action_items = self._extract_action_items(email_content)
             deadlines = self._extract_deadlines(email_content)
+            
+            method_info = 'local'
+            if fallback_reason:
+                method_info = f'local ({fallback_reason})'
             
             return {
                 'success': True,
@@ -105,7 +117,7 @@ class EmailAnalyzer:
                     'action_items': action_items,
                     'deadlines': deadlines
                 },
-                'method': 'local'
+                'method': method_info
             }
             
         except Exception as e:

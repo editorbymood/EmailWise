@@ -1090,15 +1090,23 @@ body {
     box-shadow: 0 0 4px rgba(0, 255, 255, 0.5);
 }
 
+/* Performance Optimizations */
+.cyber-card,
+.cyber-btn,
+.particle,
+.wave {
+    will-change: transform, opacity;
+}
+
 /* Responsive Adjustments */
 @media (max-width: 768px) {
     .glitch {
-        animation-duration: 6s; /* Slower on mobile for better performance */
+        animation-duration: 8s;
     }
     
     .energy-waves,
     .particles-container {
-        opacity: 0.5; /* Reduce intensity on mobile */
+        opacity: 0.3;
     }
     
     .cyber-btn {
@@ -1108,7 +1116,8 @@ body {
     }
     
     .cyber-textarea {
-        font-size: 12px;
+        font-size: 13px;
+        line-height: 1.5;
     }
     
     .hint-container {
@@ -1116,7 +1125,17 @@ body {
     }
     
     .neon-text {
-        font-size: 2rem !important;
+        font-size: 2.5rem !important;
+    }
+    
+    .cyber-controls {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .cyber-controls .cyber-btn {
+        width: 100%;
+        max-width: 200px;
     }
 }
 
@@ -1823,6 +1842,26 @@ body {
     100% {
         transform: rotate(360deg);
     }
+}
+
+/* Enhanced UX improvements */
+.cyber-btn {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cyber-btn:not(:disabled):hover {
+    transform: translateY(-1px);
+    box-shadow: 
+        0 0 20px rgba(0, 255, 255, 0.4),
+        0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.cyber-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cyber-textarea:focus {
+    transition: all 0.3s ease;
 }
 
 /* Responsive Design */
