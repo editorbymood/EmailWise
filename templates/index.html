@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EmailWise - AI Email Analysis</title>
+    
+    <!-- Bootstrap CSS with dark theme -->
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="container py-5">
+        <!-- Header -->
+        <header class="text-center mb-5">
+            <h1 class="display-4 fw-bold text-primary">
+                <i class="fas fa-envelope-open-text me-3"></i>EmailWise
+            </h1>
+            <p class="lead text-muted">AI-powered email analysis for summaries, action items, and deadlines</p>
+        </header>
+
+        <!-- Main Content -->
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <!-- Email Input Section -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3 class="card-title mb-0">
+                            <i class="fas fa-paste me-2"></i>Paste Your Email
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="emailForm">
+                            <div class="mb-3">
+                                <textarea 
+                                    class="form-control" 
+                                    id="emailContent" 
+                                    rows="8" 
+                                    placeholder="Paste your email content here..."
+                                    required
+                                ></textarea>
+                            </div>
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <button type="button" class="btn btn-outline-secondary me-md-2" id="clearBtn">
+                                    <i class="fas fa-eraser me-2"></i>Clear
+                                </button>
+                                <button type="submit" class="btn btn-primary" id="analyzeBtn">
+                                    <i class="fas fa-brain me-2"></i>Analyze Email
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Loading Indicator -->
+                <div id="loadingIndicator" class="text-center d-none mb-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Analyzing...</span>
+                    </div>
+                    <p class="mt-2 text-muted">Analyzing your email...</p>
+                </div>
+
+                <!-- Error Alert -->
+                <div id="errorAlert" class="alert alert-danger d-none" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <span id="errorMessage"></span>
+                </div>
+
+                <!-- Results Section -->
+                <div id="resultsSection" class="d-none">
+                    <!-- Summary -->
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h4 class="card-title mb-0">
+                                <i class="fas fa-list-ul me-2 text-info"></i>Summary
+                            </h4>
+                            <button class="btn btn-sm btn-outline-light copy-btn" data-target="summaryContent">
+                                <i class="fas fa-copy me-1"></i>Copy
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div id="summaryContent"></div>
+                        </div>
+                    </div>
+
+                    <!-- Action Items -->
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h4 class="card-title mb-0">
+                                <i class="fas fa-tasks me-2 text-warning"></i>Action Items
+                            </h4>
+                            <button class="btn btn-sm btn-outline-light copy-btn" data-target="actionItemsContent">
+                                <i class="fas fa-copy me-1"></i>Copy
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div id="actionItemsContent"></div>
+                        </div>
+                    </div>
+
+                    <!-- Deadlines -->
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h4 class="card-title mb-0">
+                                <i class="fas fa-calendar-alt me-2 text-danger"></i>Dates & Deadlines
+                            </h4>
+                            <button class="btn btn-sm btn-outline-light copy-btn" data-target="deadlinesContent">
+                                <i class="fas fa-copy me-1"></i>Copy
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div id="deadlinesContent"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History Section -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4 class="card-title mb-0">
+                            <i class="fas fa-history me-2 text-secondary"></i>Recent Analysis History
+                        </h4>
+                        <button class="btn btn-sm btn-outline-secondary" id="refreshHistoryBtn">
+                            <i class="fas fa-sync-alt me-1"></i>Refresh
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="historyContent">
+                            <p class="text-muted text-center">No analysis history yet. Analyze an email to see it here.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
