@@ -55,6 +55,107 @@ class EmailWise {
         
         // Initialize auto-resize
         this.autoResizeTextarea();
+        
+        // Initialize futuristic effects
+        this.initializeParticleSystem();
+        this.initializeCyberEffects();
+    }
+
+    initializeParticleSystem() {
+        const particlesContainer = document.getElementById('particles');
+        if (!particlesContainer) return;
+
+        // Create floating particles
+        for (let i = 0; i < 50; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 15 + 's';
+            particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+            particlesContainer.appendChild(particle);
+        }
+    }
+
+    initializeCyberEffects() {
+        // Initialize typing effect for cyber text elements
+        this.initializeTypingEffect();
+        
+        // Initialize matrix rain effect
+        this.initializeMatrixRain();
+        
+        // Initialize cyber button particles
+        this.initializeButtonParticles();
+    }
+
+    initializeTypingEffect() {
+        const cyberElements = document.querySelectorAll('.cyber-text');
+        cyberElements.forEach(element => {
+            const text = element.textContent;
+            element.textContent = '';
+            let i = 0;
+            const typeInterval = setInterval(() => {
+                if (i < text.length) {
+                    element.textContent += text.charAt(i);
+                    i++;
+                } else {
+                    clearInterval(typeInterval);
+                }
+            }, 50);
+        });
+    }
+
+    initializeMatrixRain() {
+        // Add subtle matrix-like effect to certain areas
+        const matrices = document.querySelectorAll('.data-stream');
+        matrices.forEach(matrix => {
+            setInterval(() => {
+                const char = String.fromCharCode(0x30A0 + Math.random() * 96);
+                const span = document.createElement('span');
+                span.textContent = char;
+                span.style.position = 'absolute';
+                span.style.color = 'rgba(0, 255, 255, 0.1)';
+                span.style.fontSize = '8px';
+                span.style.animation = 'matrix-fall 2s linear forwards';
+                matrix.appendChild(span);
+                
+                setTimeout(() => {
+                    if (span.parentNode) span.parentNode.removeChild(span);
+                }, 2000);
+            }, 200);
+        });
+    }
+
+    initializeButtonParticles() {
+        const cyberButtons = document.querySelectorAll('.cyber-btn');
+        cyberButtons.forEach(button => {
+            button.addEventListener('mouseenter', () => {
+                this.createButtonParticles(button);
+            });
+        });
+    }
+
+    createButtonParticles(button) {
+        const rect = button.getBoundingClientRect();
+        for (let i = 0; i < 5; i++) {
+            const particle = document.createElement('div');
+            particle.style.cssText = `
+                position: fixed;
+                width: 2px;
+                height: 2px;
+                background: #00ffff;
+                border-radius: 50%;
+                pointer-events: none;
+                z-index: 9999;
+                left: ${rect.left + Math.random() * rect.width}px;
+                top: ${rect.top + Math.random() * rect.height}px;
+                animation: explode-particle 0.8s ease-out forwards;
+            `;
+            document.body.appendChild(particle);
+            
+            setTimeout(() => {
+                if (particle.parentNode) particle.parentNode.removeChild(particle);
+            }, 800);
+        }
     }
 
     attachEventListeners() {

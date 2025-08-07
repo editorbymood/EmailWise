@@ -18,82 +18,167 @@
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
 </head>
 <body>
-    <!-- Background Elements -->
+    <!-- Futuristic Background Elements -->
     <div class="bg-decoration">
         <div class="bg-circle bg-circle-1"></div>
         <div class="bg-circle bg-circle-2"></div>
         <div class="bg-circle bg-circle-3"></div>
+        <div class="particles-container" id="particles"></div>
+        <div class="grid-lines">
+            <div class="grid-line horizontal" style="top: 20%;"></div>
+            <div class="grid-line horizontal" style="top: 40%;"></div>
+            <div class="grid-line horizontal" style="top: 60%;"></div>
+            <div class="grid-line horizontal" style="top: 80%;"></div>
+            <div class="grid-line vertical" style="left: 20%;"></div>
+            <div class="grid-line vertical" style="left: 40%;"></div>
+            <div class="grid-line vertical" style="left: 60%;"></div>
+            <div class="grid-line vertical" style="left: 80%;"></div>
+        </div>
+        <div class="energy-waves">
+            <div class="wave wave-1"></div>
+            <div class="wave wave-2"></div>
+            <div class="wave wave-3"></div>
+        </div>
     </div>
     
     <div class="container py-5">
-        <!-- Header -->
+        <!-- Futuristic Header -->
         <header class="text-center mb-5 hero-section">
             <div class="hero-icon-wrapper">
-                <i class="fas fa-envelope-open-text hero-icon"></i>
+                <div class="hologram-effect">
+                    <i class="fas fa-envelope-open-text hero-icon"></i>
+                    <div class="scan-lines"></div>
+                </div>
+                <div class="energy-rings">
+                    <div class="ring ring-1"></div>
+                    <div class="ring ring-2"></div>
+                    <div class="ring ring-3"></div>
+                </div>
             </div>
-            <h1 class="display-3 fw-bold hero-title gradient-text">
-                EmailWise
+            <h1 class="display-3 fw-bold hero-title neon-text">
+                <span class="glitch" data-text="EmailWise">EmailWise</span>
             </h1>
-            <p class="lead hero-subtitle">Transform your emails into actionable insights with AI-powered analysis</p>
+            <p class="lead hero-subtitle cyber-text">Transform your emails into actionable insights with AI-powered analysis</p>
             <div class="hero-features">
-                <span class="badge feature-badge"><i class="fas fa-brain me-1"></i>AI Powered</span>
-                <span class="badge feature-badge"><i class="fas fa-bolt me-1"></i>Fast Analysis</span>
-                <span class="badge feature-badge"><i class="fas fa-shield-alt me-1"></i>Secure</span>
+                <span class="badge feature-badge cyber-badge pulse-glow">
+                    <i class="fas fa-brain me-1"></i>AI Powered
+                    <div class="badge-glow"></div>
+                </span>
+                <span class="badge feature-badge cyber-badge pulse-glow" style="animation-delay: 0.5s;">
+                    <i class="fas fa-bolt me-1"></i>Fast Analysis
+                    <div class="badge-glow"></div>
+                </span>
+                <span class="badge feature-badge cyber-badge pulse-glow" style="animation-delay: 1s;">
+                    <i class="fas fa-shield-alt me-1"></i>Secure
+                    <div class="badge-glow"></div>
+                </span>
             </div>
         </header>
 
         <!-- Main Content -->
         <div class="row justify-content-center">
             <div class="col-lg-10">
-                <!-- Email Input Section -->
-                <div class="card glass-card mb-4 input-section">
-                    <div class="card-header border-0">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <h3 class="card-title mb-0 section-title">
-                                <i class="fas fa-envelope-open section-icon me-2"></i>
-                                Paste Your Email
-                            </h3>
-                            <div class="input-stats d-none" id="inputStats">
-                                <small class="text-muted">
-                                    <span id="charCount">0</span> characters
-                                </small>
-                            </div>
-                        </div>
+                <!-- Futuristic Email Input Section -->
+                <div class="card cyber-card mb-4 input-section">
+                    <div class="cyber-frame">
+                        <div class="frame-line top"></div>
+                        <div class="frame-line right"></div>
+                        <div class="frame-line bottom"></div>
+                        <div class="frame-line left"></div>
+                        <div class="frame-corner tl"></div>
+                        <div class="frame-corner tr"></div>
+                        <div class="frame-corner bl"></div>
+                        <div class="frame-corner br"></div>
                     </div>
-                    <div class="card-body">
-                        <form id="emailForm">
-                            <div class="mb-4 position-relative">
-                                <textarea 
-                                    class="form-control modern-textarea" 
-                                    id="emailContent" 
-                                    rows="10" 
-                                    placeholder="Paste your email content here... 📧
-
-Try something like:
-• Meeting follow-ups with action items
-• Project updates with deadlines
-• Client communications with tasks"
-                                    required
-                                ></textarea>
-                                <div class="textarea-overlay">
-                                    <div class="paste-hint" id="pasteHint">
-                                        <i class="fas fa-clipboard me-2"></i>
-                                        Press Ctrl+V to paste
+                    <div class="card-header border-0 cyber-header">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <h3 class="card-title mb-0 section-title neon-text">
+                                <div class="title-icon-wrapper">
+                                    <i class="fas fa-upload section-icon"></i>
+                                    <div class="icon-orbit"></div>
+                                </div>
+                                DATA INPUT TERMINAL
+                            </h3>
+                            <div class="input-stats cyber-stats d-none" id="inputStats">
+                                <div class="stats-display">
+                                    <span class="stats-label">BYTES:</span>
+                                    <span class="stats-value" id="charCount">0</span>
+                                    <div class="data-flow">
+                                        <div class="flow-particle"></div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="action-buttons">
-                                <button type="button" class="btn btn-outline-light btn-modern me-3" id="clearBtn">
-                                    <i class="fas fa-eraser me-2"></i>Clear
-                                </button>
-                                <button type="submit" class="btn btn-primary btn-modern btn-analyze" id="analyzeBtn">
-                                    <div class="btn-content">
-                                        <i class="fas fa-magic me-2"></i>
-                                        <span>Analyze Email</span>
+                        </div>
+                        <div class="header-scan-line"></div>
+                    </div>
+                    <div class="card-body cyber-body">
+                        <form id="emailForm">
+                            <div class="mb-4 position-relative cyber-input-container">
+                                <div class="input-frame">
+                                    <div class="frame-corner tl"></div>
+                                    <div class="frame-corner tr"></div>
+                                    <div class="frame-corner bl"></div>
+                                    <div class="frame-corner br"></div>
+                                </div>
+                                <textarea 
+                                    class="form-control cyber-textarea" 
+                                    id="emailContent" 
+                                    rows="10" 
+                                    placeholder="[INITIALIZE AI ANALYSIS PROTOCOL]
+
+> AWAITING EMAIL DATA STREAM...
+> SUPPORTED FORMATS: TEXT, HTML, PLAIN
+> ANALYSIS MODULES: SUMMARY | ACTION_ITEMS | DEADLINES
+
+[SYSTEM_READY]"
+                                    required
+                                ></textarea>
+                                <div class="textarea-effects">
+                                    <div class="scan-lines"></div>
+                                    <div class="data-stream">
+                                        <div class="stream-line"></div>
+                                        <div class="stream-line" style="animation-delay: 0.5s;"></div>
+                                        <div class="stream-line" style="animation-delay: 1s;"></div>
                                     </div>
-                                    <div class="btn-loading-spinner d-none">
-                                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
-                                        <span>Analyzing...</span>
+                                </div>
+                                <div class="paste-hint cyber-hint" id="pasteHint">
+                                    <div class="hint-container">
+                                        <div class="hint-icon">
+                                            <i class="fas fa-download"></i>
+                                            <div class="icon-pulse"></div>
+                                        </div>
+                                        <span class="hint-text">READY FOR DATA INJECTION</span>
+                                        <div class="hint-waves">
+                                            <div class="wave"></div>
+                                            <div class="wave"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="action-buttons cyber-controls">
+                                <button type="button" class="btn cyber-btn cyber-btn-secondary me-3" id="clearBtn">
+                                    <div class="btn-bg"></div>
+                                    <div class="btn-content">
+                                        <i class="fas fa-times me-2"></i>
+                                        <span>CLEAR</span>
+                                    </div>
+                                    <div class="btn-glow"></div>
+                                </button>
+                                <button type="submit" class="btn cyber-btn cyber-btn-primary" id="analyzeBtn">
+                                    <div class="btn-bg"></div>
+                                    <div class="btn-content" id="btnContent">
+                                        <i class="fas fa-brain me-2"></i>
+                                        <span>ENGAGE AI ANALYSIS</span>
+                                    </div>
+                                    <div class="btn-loading-spinner d-none" id="btnLoadingSpinner">
+                                        <div class="cyber-spinner"></div>
+                                        <span>ANALYZING...</span>
+                                    </div>
+                                    <div class="btn-glow"></div>
+                                    <div class="btn-particles">
+                                        <div class="particle"></div>
+                                        <div class="particle"></div>
+                                        <div class="particle"></div>
                                     </div>
                                 </button>
                             </div>
