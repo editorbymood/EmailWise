@@ -11,46 +11,90 @@
     <!-- Font Awesome for icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <!-- Custom CSS -->
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
 </head>
 <body>
+    <!-- Background Elements -->
+    <div class="bg-decoration">
+        <div class="bg-circle bg-circle-1"></div>
+        <div class="bg-circle bg-circle-2"></div>
+        <div class="bg-circle bg-circle-3"></div>
+    </div>
+    
     <div class="container py-5">
         <!-- Header -->
-        <header class="text-center mb-5">
-            <h1 class="display-4 fw-bold text-primary">
-                <i class="fas fa-envelope-open-text me-3"></i>EmailWise
+        <header class="text-center mb-5 hero-section">
+            <div class="hero-icon-wrapper">
+                <i class="fas fa-envelope-open-text hero-icon"></i>
+            </div>
+            <h1 class="display-3 fw-bold hero-title gradient-text">
+                EmailWise
             </h1>
-            <p class="lead text-muted">AI-powered email analysis for summaries, action items, and deadlines</p>
+            <p class="lead hero-subtitle">Transform your emails into actionable insights with AI-powered analysis</p>
+            <div class="hero-features">
+                <span class="badge feature-badge"><i class="fas fa-brain me-1"></i>AI Powered</span>
+                <span class="badge feature-badge"><i class="fas fa-bolt me-1"></i>Fast Analysis</span>
+                <span class="badge feature-badge"><i class="fas fa-shield-alt me-1"></i>Secure</span>
+            </div>
         </header>
 
         <!-- Main Content -->
         <div class="row justify-content-center">
             <div class="col-lg-10">
                 <!-- Email Input Section -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h3 class="card-title mb-0">
-                            <i class="fas fa-paste me-2"></i>Paste Your Email
-                        </h3>
+                <div class="card glass-card mb-4 input-section">
+                    <div class="card-header border-0">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <h3 class="card-title mb-0 section-title">
+                                <i class="fas fa-envelope-open section-icon me-2"></i>
+                                Paste Your Email
+                            </h3>
+                            <div class="input-stats d-none" id="inputStats">
+                                <small class="text-muted">
+                                    <span id="charCount">0</span> characters
+                                </small>
+                            </div>
+                        </div>
                     </div>
                     <div class="card-body">
                         <form id="emailForm">
-                            <div class="mb-3">
+                            <div class="mb-4 position-relative">
                                 <textarea 
-                                    class="form-control" 
+                                    class="form-control modern-textarea" 
                                     id="emailContent" 
-                                    rows="8" 
-                                    placeholder="Paste your email content here..."
+                                    rows="10" 
+                                    placeholder="Paste your email content here... 📧
+
+Try something like:
+• Meeting follow-ups with action items
+• Project updates with deadlines
+• Client communications with tasks"
                                     required
                                 ></textarea>
+                                <div class="textarea-overlay">
+                                    <div class="paste-hint" id="pasteHint">
+                                        <i class="fas fa-clipboard me-2"></i>
+                                        Press Ctrl+V to paste
+                                    </div>
+                                </div>
                             </div>
-                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                <button type="button" class="btn btn-outline-secondary me-md-2" id="clearBtn">
+                            <div class="action-buttons">
+                                <button type="button" class="btn btn-outline-light btn-modern me-3" id="clearBtn">
                                     <i class="fas fa-eraser me-2"></i>Clear
                                 </button>
-                                <button type="submit" class="btn btn-primary" id="analyzeBtn">
-                                    <i class="fas fa-brain me-2"></i>Analyze Email
+                                <button type="submit" class="btn btn-primary btn-modern btn-analyze" id="analyzeBtn">
+                                    <div class="btn-content">
+                                        <i class="fas fa-magic me-2"></i>
+                                        <span>Analyze Email</span>
+                                    </div>
+                                    <div class="btn-loading-spinner d-none">
+                                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                                        <span>Analyzing...</span>
+                                    </div>
                                 </button>
                             </div>
                         </form>
@@ -58,80 +102,129 @@
                 </div>
 
                 <!-- Loading Indicator -->
-                <div id="loadingIndicator" class="text-center d-none mb-4">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Analyzing...</span>
+                <div id="loadingIndicator" class="loading-section d-none mb-4">
+                    <div class="loading-card">
+                        <div class="loading-animation">
+                            <div class="loading-dots">
+                                <div class="dot"></div>
+                                <div class="dot"></div>
+                                <div class="dot"></div>
+                            </div>
+                        </div>
+                        <h4 class="loading-title">Analyzing your email</h4>
+                        <p class="loading-subtitle" id="loadingMessage">Processing content with AI...</p>
+                        <div class="loading-progress">
+                            <div class="progress-bar"></div>
+                        </div>
                     </div>
-                    <p class="mt-2 text-muted">Analyzing your email...</p>
                 </div>
 
                 <!-- Error Alert -->
-                <div id="errorAlert" class="alert alert-danger d-none" role="alert">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    <span id="errorMessage"></span>
+                <div id="errorAlert" class="alert alert-danger alert-modern d-none" role="alert">
+                    <div class="alert-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="alert-content">
+                        <div class="alert-title">Something went wrong</div>
+                        <div class="alert-message" id="errorMessage"></div>
+                    </div>
+                    <button type="button" class="alert-close" id="closeError">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
 
                 <!-- Results Section -->
-                <div id="resultsSection" class="d-none">
-                    <!-- Summary -->
-                    <div class="card mb-4">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h4 class="card-title mb-0">
-                                <i class="fas fa-list-ul me-2 text-info"></i>Summary
-                            </h4>
-                            <button class="btn btn-sm btn-outline-light copy-btn" data-target="summaryContent">
-                                <i class="fas fa-copy me-1"></i>Copy
-                            </button>
-                        </div>
-                        <div class="card-body">
-                            <div id="summaryContent"></div>
-                        </div>
+                <div id="resultsSection" class="results-container d-none">
+                    <div class="results-header mb-4">
+                        <h2 class="results-title">
+                            <i class="fas fa-chart-line me-2"></i>
+                            Analysis Results
+                        </h2>
+                        <div class="results-meta" id="resultsMeta"></div>
                     </div>
 
-                    <!-- Action Items -->
-                    <div class="card mb-4">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h4 class="card-title mb-0">
-                                <i class="fas fa-tasks me-2 text-warning"></i>Action Items
-                            </h4>
-                            <button class="btn btn-sm btn-outline-light copy-btn" data-target="actionItemsContent">
-                                <i class="fas fa-copy me-1"></i>Copy
-                            </button>
+                    <div class="results-grid">
+                        <!-- Summary -->
+                        <div class="result-card summary-card">
+                            <div class="result-header">
+                                <div class="result-icon summary-icon">
+                                    <i class="fas fa-list-ul"></i>
+                                </div>
+                                <div class="result-info">
+                                    <h4 class="result-title">Summary</h4>
+                                    <p class="result-subtitle">Key points extracted</p>
+                                </div>
+                                <button class="copy-btn modern-copy-btn" data-target="summaryContent" title="Copy summary">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                            <div class="result-content">
+                                <div id="summaryContent" class="content-area"></div>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <div id="actionItemsContent"></div>
-                        </div>
-                    </div>
 
-                    <!-- Deadlines -->
-                    <div class="card mb-4">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h4 class="card-title mb-0">
-                                <i class="fas fa-calendar-alt me-2 text-danger"></i>Dates & Deadlines
-                            </h4>
-                            <button class="btn btn-sm btn-outline-light copy-btn" data-target="deadlinesContent">
-                                <i class="fas fa-copy me-1"></i>Copy
-                            </button>
+                        <!-- Action Items -->
+                        <div class="result-card action-card">
+                            <div class="result-header">
+                                <div class="result-icon action-icon">
+                                    <i class="fas fa-tasks"></i>
+                                </div>
+                                <div class="result-info">
+                                    <h4 class="result-title">Action Items</h4>
+                                    <p class="result-subtitle">Tasks to complete</p>
+                                </div>
+                                <button class="copy-btn modern-copy-btn" data-target="actionItemsContent" title="Copy action items">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                            <div class="result-content">
+                                <div id="actionItemsContent" class="content-area"></div>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <div id="deadlinesContent"></div>
+
+                        <!-- Deadlines -->
+                        <div class="result-card deadline-card">
+                            <div class="result-header">
+                                <div class="result-icon deadline-icon">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </div>
+                                <div class="result-info">
+                                    <h4 class="result-title">Dates & Deadlines</h4>
+                                    <p class="result-subtitle">Time-sensitive items</p>
+                                </div>
+                                <button class="copy-btn modern-copy-btn" data-target="deadlinesContent" title="Copy deadlines">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                            <div class="result-content">
+                                <div id="deadlinesContent" class="content-area"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- History Section -->
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h4 class="card-title mb-0">
-                            <i class="fas fa-history me-2 text-secondary"></i>Recent Analysis History
-                        </h4>
-                        <button class="btn btn-sm btn-outline-secondary" id="refreshHistoryBtn">
-                            <i class="fas fa-sync-alt me-1"></i>Refresh
-                        </button>
+                <div class="card glass-card history-section">
+                    <div class="card-header border-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="card-title mb-0 section-title">
+                                <i class="fas fa-history section-icon me-2"></i>
+                                Recent Analysis History
+                            </h4>
+                            <button class="btn btn-sm btn-outline-light btn-modern" id="refreshHistoryBtn">
+                                <i class="fas fa-sync-alt me-1"></i>Refresh
+                            </button>
+                        </div>
                     </div>
                     <div class="card-body">
-                        <div id="historyContent">
-                            <p class="text-muted text-center">No analysis history yet. Analyze an email to see it here.</p>
+                        <div id="historyContent" class="history-container">
+                            <div class="empty-history">
+                                <div class="empty-icon">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <h5>No analysis history yet</h5>
+                                <p class="text-muted">Analyze an email to see your results here</p>
+                            </div>
                         </div>
                     </div>
                 </div>

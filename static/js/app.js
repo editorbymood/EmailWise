@@ -5,6 +5,7 @@ class EmailWise {
         this.initializeElements();
         this.attachEventListeners();
         this.loadHistory();
+        this.initializeEnhancements();
     }
 
     initializeElements() {
@@ -19,6 +20,7 @@ class EmailWise {
         this.errorAlert = document.getElementById('errorAlert');
         this.errorMessage = document.getElementById('errorMessage');
         this.resultsSection = document.getElementById('resultsSection');
+        this.resultsMeta = document.getElementById('resultsMeta');
 
         // Content elements
         this.summaryContent = document.getElementById('summaryContent');
@@ -26,8 +28,33 @@ class EmailWise {
         this.deadlinesContent = document.getElementById('deadlinesContent');
         this.historyContent = document.getElementById('historyContent');
 
+        // Enhanced UI elements
+        this.pasteHint = document.getElementById('pasteHint');
+        this.inputStats = document.getElementById('inputStats');
+        this.charCount = document.getElementById('charCount');
+        this.loadingMessage = document.getElementById('loadingMessage');
+        this.closeError = document.getElementById('closeError');
+
         // History button
         this.refreshHistoryBtn = document.getElementById('refreshHistoryBtn');
+        
+        // Loading states
+        this.btnContent = this.analyzeBtn.querySelector('.btn-content');
+        this.btnLoadingSpinner = this.analyzeBtn.querySelector('.btn-loading-spinner');
+    }
+
+    initializeEnhancements() {
+        // Initialize character counter
+        this.updateCharacterCount();
+        
+        // Add smooth scrolling
+        document.documentElement.style.scrollBehavior = 'smooth';
+        
+        // Initialize paste hint
+        this.setupPasteHint();
+        
+        // Initialize auto-resize
+        this.autoResizeTextarea();
     }
 
     attachEventListeners() {
@@ -55,10 +82,105 @@ class EmailWise {
             this.loadHistory();
         });
 
-        // Auto-resize textarea
-        this.emailContent.addEventListener('input', () => {
+        // Enhanced textarea events
+        this.emailContent.addEventListener('input', (e) => {
             this.autoResizeTextarea();
+            this.updateCharacterCount();
+            this.togglePasteHint();
         });
+
+        this.emailContent.addEventListener('focus', () => {
+            this.showInputStats();
+        });
+
+        this.emailContent.addEventListener('blur', () => {
+            this.hideInputStats();
+        });
+
+        this.emailContent.addEventListener('paste', () => {
+            this.hidePasteHint();
+            setTimeout(() => {
+                this.autoResizeTextarea();
+                this.updateCharacterCount();
+            }, 100);
+        });
+
+        // Close error alert
+        if (this.closeError) {
+            this.closeError.addEventListener('click', () => {
+                this.hideError();
+            });
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ctrl/Cmd + Enter to analyze
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                if (this.emailContent.value.trim()) {
+                    this.analyzeEmail();
+                }
+            }
+            
+            // Escape to close error
+            if (e.key === 'Escape') {
+                this.hideError();
+            }
+        });
+    }
+
+    setupPasteHint() {
+        if (this.pasteHint) {
+            // Show paste hint when textarea is empty and focused
+            this.emailContent.addEventListener('focus', () => {
+                if (!this.emailContent.value.trim()) {
+                    this.showPasteHint();
+                }
+            });
+
+            this.emailContent.addEventListener('blur', () => {
+                this.hidePasteHint();
+            });
+        }
+    }
+
+    showPasteHint() {
+        if (this.pasteHint) {
+            this.pasteHint.classList.add('show');
+        }
+    }
+
+    hidePasteHint() {
+        if (this.pasteHint) {
+            this.pasteHint.classList.remove('show');
+        }
+    }
+
+    togglePasteHint() {
+        if (!this.emailContent.value.trim()) {
+            this.showPasteHint();
+        } else {
+            this.hidePasteHint();
+        }
+    }
+
+    updateCharacterCount() {
+        if (this.charCount) {
+            const count = this.emailContent.value.length;
+            this.charCount.textContent = count.toLocaleString();
+        }
+    }
+
+    showInputStats() {
+        if (this.inputStats) {
+            this.inputStats.classList.remove('d-none');
+        }
+    }
+
+    hideInputStats() {
+        if (this.inputStats && !this.emailContent.value.trim()) {
+            this.inputStats.classList.add('d-none');
+        }
     }
 
     async analyzeEmail() {
@@ -101,32 +223,56 @@ class EmailWise {
     }
 
     displayResults(data, method) {
-        // Display summary
+        // Display enhanced results
         this.displaySection(this.summaryContent, data.summary, 'No key points found in this email.');
-
-        // Display action items
         this.displaySection(this.actionItemsContent, data.action_items, 'No action items identified in this email.');
-
-        // Display deadlines
         this.displaySection(this.deadlinesContent, data.deadlines, 'No dates or deadlines found in this email.');
 
-        // Show method indicator
-        const methodBadge = method === 'openai' ? 
-            '<span class="badge bg-success ms-2">AI Powered</span>' : 
-            '<span class="badge bg-secondary ms-2">Local Analysis</span>';
-        
-        // Add method indicator to summary header
-        const summaryHeader = document.querySelector('.card-header h4');
-        if (summaryHeader && !summaryHeader.querySelector('.badge')) {
-            summaryHeader.innerHTML += methodBadge;
-        }
+        // Update results metadata
+        this.updateResultsMeta(data, method);
 
-        // Show results section with animation
+        // Show results section with enhanced animation
         this.resultsSection.classList.remove('d-none');
         this.resultsSection.classList.add('fade-in');
 
-        // Scroll to results
-        this.resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Add staggered animation to result cards
+        const resultCards = this.resultsSection.querySelectorAll('.result-card');
+        resultCards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+            card.classList.add('fade-in');
+        });
+
+        // Smooth scroll to results with offset
+        setTimeout(() => {
+            const rect = this.resultsSection.getBoundingClientRect();
+            const offset = 80; // Account for fixed headers
+            window.scrollTo({
+                top: window.pageYOffset + rect.top - offset,
+                behavior: 'smooth'
+            });
+        }, 200);
+    }
+
+    updateResultsMeta(data, method) {
+        if (this.resultsMeta) {
+            const totalItems = (data.summary?.length || 0) + 
+                             (data.action_items?.length || 0) + 
+                             (data.deadlines?.length || 0);
+            
+            const methodBadge = method === 'openai' ? 
+                '<span class="badge bg-success">✨ AI Analysis</span>' : 
+                '<span class="badge bg-secondary">🔧 Local Analysis</span>';
+            
+            const analysisTime = new Date().toLocaleTimeString();
+            
+            this.resultsMeta.innerHTML = `
+                <div class="d-flex flex-wrap justify-content-center align-items-center gap-3">
+                    ${methodBadge}
+                    <span class="badge bg-info">${totalItems} items extracted</span>
+                    <small class="text-muted">Analyzed at ${analysisTime}</small>
+                </div>
+            `;
+        }
     }
 
     displaySection(container, items, emptyMessage) {
@@ -134,6 +280,7 @@ class EmailWise {
             container.innerHTML = `
                 <div class="empty-state">
                     <i class="fas fa-info-circle"></i>
+                    <h5>No items found</h5>
                     <p class="mb-0">${emptyMessage}</p>
                 </div>
             `;
@@ -142,10 +289,10 @@ class EmailWise {
 
         const listItems = items
             .filter(item => item && item.trim().length > 0)
-            .map(item => `
-                <div class="result-item">
+            .map((item, index) => `
+                <div class="result-item" style="animation-delay: ${index * 0.05}s">
                     <i class="fas fa-check-circle"></i>
-                    ${this.escapeHtml(item.trim())}
+                    <div class="result-item-text">${this.escapeHtml(item.trim())}</div>
                 </div>
             `)
             .join('');
@@ -153,6 +300,7 @@ class EmailWise {
         container.innerHTML = listItems || `
             <div class="empty-state">
                 <i class="fas fa-info-circle"></i>
+                <h5>No items found</h5>
                 <p class="mb-0">${emptyMessage}</p>
             </div>
         `;
@@ -185,31 +333,52 @@ class EmailWise {
     }
 
     displayHistory(historyItems) {
-        const historyHtml = historyItems.map(item => `
-            <div class="history-item">
-                <div class="history-meta mb-2">
+        const historyHtml = historyItems.map((item, index) => `
+            <div class="history-item" style="animation-delay: ${index * 0.1}s">
+                <div class="history-meta">
                     <i class="fas fa-clock me-1"></i>
-                    ${item.created_at}
+                    <span>${item.created_at}</span>
+                    <span class="badge bg-dark ms-auto">ID: ${item.id}</span>
                 </div>
-                <div class="fw-bold mb-2">${this.escapeHtml(item.email_content)}</div>
-                <div class="row">
-                    <div class="col-md-4">
-                        <small class="text-muted">Summary:</small>
-                        <div class="small">${item.summary.length > 0 ? item.summary.slice(0, 2).map(s => this.escapeHtml(s)).join('<br>') : 'None'}</div>
+                <div class="history-email-preview">
+                    ${this.escapeHtml(item.email_content)}
+                </div>
+                <div class="history-results">
+                    <div class="history-result-section">
+                        <div class="history-result-title">Summary</div>
+                        <div class="history-result-content">
+                            ${item.summary.length > 0 ? 
+                                item.summary.slice(0, 3).map(s => `<div class="result-item"><i class="fas fa-dot-circle"></i> ${this.escapeHtml(s)}</div>`).join('') : 
+                                '<div class="history-no-content">None found</div>'}
+                        </div>
                     </div>
-                    <div class="col-md-4">
-                        <small class="text-muted">Action Items:</small>
-                        <div class="small">${item.action_items.length > 0 ? item.action_items.slice(0, 2).map(a => this.escapeHtml(a)).join('<br>') : 'None'}</div>
+                    <div class="history-result-section">
+                        <div class="history-result-title">Action Items</div>
+                        <div class="history-result-content">
+                            ${item.action_items.length > 0 ? 
+                                item.action_items.slice(0, 3).map(a => `<div class="result-item"><i class="fas fa-dot-circle"></i> ${this.escapeHtml(a)}</div>`).join('') : 
+                                '<div class="history-no-content">None found</div>'}
+                        </div>
                     </div>
-                    <div class="col-md-4">
-                        <small class="text-muted">Deadlines:</small>
-                        <div class="small">${item.deadlines.length > 0 ? item.deadlines.slice(0, 2).map(d => this.escapeHtml(d)).join('<br>') : 'None'}</div>
+                    <div class="history-result-section">
+                        <div class="history-result-title">Deadlines</div>
+                        <div class="history-result-content">
+                            ${item.deadlines.length > 0 ? 
+                                item.deadlines.slice(0, 3).map(d => `<div class="result-item"><i class="fas fa-dot-circle"></i> ${this.escapeHtml(d)}</div>`).join('') : 
+                                '<div class="history-no-content">None found</div>'}
+                        </div>
                     </div>
                 </div>
             </div>
         `).join('');
 
         this.historyContent.innerHTML = historyHtml;
+        
+        // Add fade-in animation to history items
+        const historyElements = this.historyContent.querySelectorAll('.history-item');
+        historyElements.forEach(item => {
+            item.classList.add('fade-in');
+        });
     }
 
     async copyToClipboard(button) {
@@ -222,16 +391,53 @@ class EmailWise {
         const textContent = this.getPlainTextFromElement(targetElement);
         
         if (!textContent.trim()) {
-            this.showError('Nothing to copy.');
+            this.showTemporaryToast('Nothing to copy', 'warning');
             return;
         }
 
         try {
             await navigator.clipboard.writeText(textContent);
             
-            // Visual feedback
+            // Enhanced visual feedback
             const originalHtml = button.innerHTML;
-            button.innerHTML = '<i class="fas fa-check me-1"></i>Copied!';
+            const originalClasses = button.className;
+            
+            button.innerHTML = '<i class="fas fa-check"></i>';
+            button.classList.add('copied');
+            
+            // Show success toast
+            this.showTemporaryToast(`Copied ${textContent.split('\n').length} items`, 'success');
+            
+            setTimeout(() => {
+                button.innerHTML = originalHtml;
+                button.className = originalClasses;
+            }, 2000);
+            
+        } catch (error) {
+            console.error('Copy failed:', error);
+            
+            // Fallback for older browsers
+            this.fallbackCopyTextToClipboard(textContent, button);
+        }
+    }
+
+    fallbackCopyTextToClipboard(text, button) {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+            document.execCommand('copy');
+            this.showTemporaryToast('Copied successfully', 'success');
+            
+            // Visual feedback for button
+            const originalHtml = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-check"></i>';
             button.classList.add('copied');
             
             setTimeout(() => {
@@ -239,10 +445,57 @@ class EmailWise {
                 button.classList.remove('copied');
             }, 2000);
             
-        } catch (error) {
-            console.error('Copy failed:', error);
-            this.showError('Failed to copy to clipboard.');
+        } catch (err) {
+            this.showTemporaryToast('Copy failed - please select text manually', 'error');
         }
+
+        document.body.removeChild(textArea);
+    }
+
+    showTemporaryToast(message, type = 'info') {
+        // Create toast element if it doesn't exist
+        let toast = document.getElementById('toast-notification');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'toast-notification';
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 12px 20px;
+                border-radius: 8px;
+                color: white;
+                font-weight: 500;
+                font-size: 0.9rem;
+                z-index: 9999;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+                max-width: 300px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            `;
+            document.body.appendChild(toast);
+        }
+
+        // Set toast style based on type
+        const colors = {
+            success: '#28a745',
+            error: '#dc3545',
+            warning: '#ffc107',
+            info: '#17a2b8'
+        };
+
+        toast.style.backgroundColor = colors[type] || colors.info;
+        toast.textContent = message;
+
+        // Show toast
+        setTimeout(() => {
+            toast.style.transform = 'translateX(0)';
+        }, 100);
+
+        // Hide toast
+        setTimeout(() => {
+            toast.style.transform = 'translateX(100%)';
+        }, 3000);
     }
 
     getPlainTextFromElement(element) {
@@ -269,13 +522,51 @@ class EmailWise {
         if (show) {
             this.loadingIndicator.classList.remove('d-none');
             this.analyzeBtn.disabled = true;
-            this.analyzeBtn.classList.add('btn-loading');
-            this.analyzeBtn.innerHTML = '<span class="visually-hidden">Analyzing...</span>';
+            
+            // Enhanced button loading state
+            if (this.btnContent && this.btnLoadingSpinner) {
+                this.btnContent.classList.add('d-none');
+                this.btnLoadingSpinner.classList.remove('d-none');
+            }
+            
+            // Dynamic loading messages
+            this.updateLoadingMessage();
+            
+            // Start loading message rotation
+            this.loadingMessageInterval = setInterval(() => {
+                this.updateLoadingMessage();
+            }, 2000);
+            
         } else {
             this.loadingIndicator.classList.add('d-none');
             this.analyzeBtn.disabled = false;
-            this.analyzeBtn.classList.remove('btn-loading');
-            this.analyzeBtn.innerHTML = '<i class="fas fa-brain me-2"></i>Analyze Email';
+            
+            // Reset button state
+            if (this.btnContent && this.btnLoadingSpinner) {
+                this.btnContent.classList.remove('d-none');
+                this.btnLoadingSpinner.classList.add('d-none');
+            }
+            
+            // Clear loading message interval
+            if (this.loadingMessageInterval) {
+                clearInterval(this.loadingMessageInterval);
+            }
+        }
+    }
+
+    updateLoadingMessage() {
+        if (this.loadingMessage) {
+            const messages = [
+                'Processing email content...',
+                'Extracting key information...',
+                'Analyzing action items...',
+                'Finding deadlines...',
+                'Generating summary...',
+                'Almost done...'
+            ];
+            
+            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+            this.loadingMessage.textContent = randomMessage;
         }
     }
 
