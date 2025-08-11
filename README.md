@@ -1,5 +1,11 @@
 <!-- Banner -->
-<h1 align="center">🚀 EmailWise — AI-Powered Email Summarizer ✨</h1>
+
+<h1 align="center">
+  <a href="https://emailwise.onrender.com/" target="_blank">
+    EmailWise – AI-Powered Email Analysis
+  </a>
+</h1>
+
 
 <p align="center">
   <img src="https://img.shields.io/badge/Flask-2C3E50?style=for-the-badge&logo=flask&logoColor=white" />
