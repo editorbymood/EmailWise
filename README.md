@@ -36,12 +36,10 @@
 
 ## 🚀 Installation & Setup  
 1️⃣ **Clone the repo**  
-```bash
-git clone https://github.com/editorbymood/EmailWise.git
+git clone "https://github.com/editorbymood/EmailWise.git"
 cd EmailWise
 
-2️⃣ Create virtual environment
-
+2️⃣ Create a virtual environment
 bash
 Copy
 Edit
@@ -49,36 +47,33 @@ python -m venv venv
 bash
 Copy
 Edit
-# Windows
+
+## Windows
 venv\Scripts\activate
-
-# Linux/Mac
+## Linux/Mac
 source venv/bin/activate
-3️⃣ Install dependencies
 
+3️⃣ Install dependencies
 bash
 Copy
 Edit
 pip install -r requirements.txt
-4️⃣ Run the app
 
+4️⃣ Run the app
 bash
 Copy
 Edit
 python app.py
 Your app will be live at http://127.0.0.1:5000/ 🚀
 
-📸 Screenshots
-Home Page	Summary Output
 
-🧠 Future Upgrades
+
+## 🧠 Future Upgrades
 📧 Direct email inbox integration (Gmail API)
-
 🌍 Multi-language summarization
-
 🎤 Voice command support for summaries
 
-🤝 Contributing
+## 🤝 Contributing
 Contributions are welcome!
 Fork the repo → Make changes → Submit a PR 🚀
 
