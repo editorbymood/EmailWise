@@ -38,22 +38,26 @@ class EmailAnalyzer:
                 return self._analyze_locally(email_content)
                 
             prompt = f"""
-            Please analyze the following email and extract:
-            1. A bullet-point summary (2-4 key points)
-            2. Any action items or tasks mentioned
-            3. Any dates, deadlines, or time-sensitive information
-            
+            You are an expert email analyst and productivity assistant. Your task is to analyze the email content provided below and extract the most critical information with high accuracy and realistic detail.
+
+            Please perform the following analysis:
+
+            1.  **Logical Summary**: Provide a descriptive, bulleted summary of the email (3-5 points). Focus on the core message, context, and key decisions or requests. Avoid generic statements; be specific to the content.
+            2.  **Action Items**: Identify all clear and implied tasks. For each task, specify who is responsible (if clear) and what exactly needs to be done. make sure to be descriptive.
+            3.  **Deadlines & Dates**: Extract all dates, times, and deadlines mentioned. If a deadline is relative (e.g., "next Friday"), try to interpret it based on context or state it as written.
+
             Email content:
             {email_content}
-            
-            Please respond in JSON format with the following structure:
+
+            Please respond in VALID JSON format with the following structure:
             {{
-                "summary": ["bullet point 1", "bullet point 2", ...],
-                "action_items": ["action 1", "action 2", ...],
-                "deadlines": ["deadline 1", "deadline 2", ...]
+                "summary": ["Detailed point 1...", "Detailed point 2...", ...],
+                "action_items": ["Action 1...", "Action 2...", ...],
+                "deadlines": ["Deadline 1...", "Deadline 2...", ...]
             }}
-            
-            If no items are found for a category, return an empty array for that category.
+
+            - If no items are found for a category, return an empty array for that category.
+            - Ensure the JSON is valid and strictly follows the structure above.
             """
             
             # the newest OpenAI model is "gpt-4o" which was released May 13, 2024.

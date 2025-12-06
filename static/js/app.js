@@ -14,13 +14,12 @@ class EmailWise {
         this.emailContent = document.getElementById('emailContent');
         this.analyzeBtn = document.getElementById('analyzeBtn');
         this.clearBtn = document.getElementById('clearBtn');
+        this.pasteBtn = document.getElementById('pasteBtn');
 
         // UI elements
-        this.loadingIndicator = document.getElementById('loadingIndicator');
         this.errorAlert = document.getElementById('errorAlert');
         this.errorMessage = document.getElementById('errorMessage');
         this.resultsSection = document.getElementById('resultsSection');
-        this.resultsMeta = document.getElementById('resultsMeta');
 
         // Content elements
         this.summaryContent = document.getElementById('summaryContent');
@@ -28,167 +27,24 @@ class EmailWise {
         this.deadlinesContent = document.getElementById('deadlinesContent');
         this.historyContent = document.getElementById('historyContent');
 
-        // Enhanced UI elements
-        this.pasteHint = document.getElementById('pasteHint');
-        this.inputStats = document.getElementById('inputStats');
+        // Stats
         this.charCount = document.getElementById('charCount');
-        this.loadingMessage = document.getElementById('loadingMessage');
         this.closeError = document.getElementById('closeError');
 
         // History button
         this.refreshHistoryBtn = document.getElementById('refreshHistoryBtn');
-        
+
         // Loading states
-        this.btnContent = this.analyzeBtn.querySelector('.btn-content');
-        this.btnLoadingSpinner = this.analyzeBtn.querySelector('.btn-loading-spinner');
+        this.btnText = this.analyzeBtn.querySelector('.btn-text');
+        this.btnLoadingSpinner = document.getElementById('btnLoadingSpinner');
     }
 
     initializeEnhancements() {
         // Initialize character counter
         this.updateCharacterCount();
-        
+
         // Add smooth scrolling
         document.documentElement.style.scrollBehavior = 'smooth';
-        
-        // Initialize paste hint
-        this.setupPasteHint();
-        
-        // Initialize auto-resize
-        this.autoResizeTextarea();
-        
-        // Initialize futuristic effects
-        this.initializeParticleSystem();
-        this.initializeCyberEffects();
-    }
-
-    initializeParticleSystem() {
-        const particlesContainer = document.getElementById('particles');
-        if (!particlesContainer) return;
-
-        // Create fewer, more subtle particles
-        for (let i = 0; i < 15; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            particle.style.left = Math.random() * 100 + '%';
-            particle.style.animationDelay = Math.random() * 15 + 's';
-            particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
-            particle.style.opacity = '0.3';
-            particlesContainer.appendChild(particle);
-        }
-    }
-
-    initializeCyberEffects() {
-        // Skip typing effect for main title to keep it visible
-        // this.initializeTypingEffect();
-        
-        // Initialize matrix rain effect
-        this.initializeMatrixRain();
-        
-        // Initialize cyber button particles
-        this.initializeButtonParticles();
-    }
-
-    initializeTypingEffect() {
-        const cyberElements = document.querySelectorAll('.cyber-text');
-        cyberElements.forEach(element => {
-            const text = element.textContent;
-            element.textContent = '';
-            let i = 0;
-            const typeInterval = setInterval(() => {
-                if (i < text.length) {
-                    element.textContent += text.charAt(i);
-                    i++;
-                } else {
-                    clearInterval(typeInterval);
-                }
-            }, 50);
-        });
-    }
-
-    initializeMatrixRain() {
-        // Optimized matrix effect with performance considerations
-        const matrices = document.querySelectorAll('.data-stream');
-        matrices.forEach(matrix => {
-            let matrixInterval = setInterval(() => {
-                // Limit concurrent elements to prevent memory issues
-                if (matrix.children.length > 3) return;
-                
-                const char = String.fromCharCode(0x2591 + Math.random() * 3); // Use block characters
-                const span = document.createElement('span');
-                span.textContent = char;
-                span.style.cssText = `
-                    position: absolute;
-                    color: rgba(0, 255, 255, 0.15);
-                    font-size: 8px;
-                    animation: matrix-fall 3s linear forwards;
-                    will-change: transform, opacity;
-                `;
-                matrix.appendChild(span);
-                
-                setTimeout(() => {
-                    if (span.parentNode) span.parentNode.removeChild(span);
-                }, 3000);
-            }, 500); // Slower interval for better performance
-            
-            // Clean up on page unload
-            window.addEventListener('beforeunload', () => {
-                clearInterval(matrixInterval);
-            });
-        });
-    }
-
-    initializeButtonParticles() {
-        const cyberButtons = document.querySelectorAll('.cyber-btn');
-        cyberButtons.forEach(button => {
-            button.addEventListener('mouseenter', () => {
-                this.createButtonParticles(button);
-            });
-        });
-    }
-
-    createButtonParticles(button) {
-        const rect = button.getBoundingClientRect();
-        const fragment = document.createDocumentFragment();
-        
-        for (let i = 0; i < 3; i++) { // Reduced particles for performance
-            const particle = document.createElement('div');
-            particle.style.cssText = `
-                position: fixed;
-                width: 2px;
-                height: 2px;
-                background: #00ffff;
-                border-radius: 50%;
-                pointer-events: none;
-                z-index: 9999;
-                left: ${rect.left + Math.random() * rect.width}px;
-                top: ${rect.top + Math.random() * rect.height}px;
-                animation: explode-particle 0.6s ease-out forwards;
-                will-change: transform, opacity;
-            `;
-            fragment.appendChild(particle);
-        }
-        
-        document.body.appendChild(fragment);
-        
-        // Cleanup with single timeout
-        setTimeout(() => {
-            document.querySelectorAll('[style*="explode-particle"]').forEach(p => {
-                if (p.parentNode) p.parentNode.removeChild(p);
-            });
-        }, 600);
-    }
-
-    // Enhanced debounced resize handler
-    debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
     }
 
     attachEventListeners() {
@@ -203,10 +59,24 @@ class EmailWise {
             this.clearForm();
         });
 
+        // Paste button
+        if (this.pasteBtn) {
+            this.pasteBtn.addEventListener('click', async () => {
+                try {
+                    const text = await navigator.clipboard.readText();
+                    this.emailContent.value = text;
+                    this.updateCharacterCount();
+                    this.hideError();
+                } catch (err) {
+                    console.error('Failed to read clipboard contents: ', err);
+                }
+            });
+        }
+
         // Copy buttons (using event delegation)
         document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('copy-btn') || e.target.closest('.copy-btn')) {
-                const button = e.target.closest('.copy-btn') || e.target;
+            if (e.target.closest('[data-target]')) {
+                const button = e.target.closest('[data-target]');
                 this.copyToClipboard(button);
             }
         });
@@ -216,27 +86,19 @@ class EmailWise {
             this.loadHistory();
         });
 
-        // Enhanced textarea events
-        this.emailContent.addEventListener('input', (e) => {
-            this.autoResizeTextarea();
+        // Clear history button
+        this.clearHistoryBtn = document.getElementById('clearHistoryBtn');
+        if (this.clearHistoryBtn) {
+            this.clearHistoryBtn.addEventListener('click', () => {
+                if (confirm('Are you sure you want to delete all history? This action cannot be undone.')) {
+                    this.clearHistory();
+                }
+            });
+        }
+
+        // Textarea events
+        this.emailContent.addEventListener('input', () => {
             this.updateCharacterCount();
-            this.togglePasteHint();
-        });
-
-        this.emailContent.addEventListener('focus', () => {
-            this.showInputStats();
-        });
-
-        this.emailContent.addEventListener('blur', () => {
-            this.hideInputStats();
-        });
-
-        this.emailContent.addEventListener('paste', () => {
-            this.hidePasteHint();
-            setTimeout(() => {
-                this.autoResizeTextarea();
-                this.updateCharacterCount();
-            }, 100);
         });
 
         // Close error alert
@@ -250,12 +112,12 @@ class EmailWise {
         document.addEventListener('keydown', (e) => {
             // Ctrl/Cmd + Enter to analyze
             if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                e.preventDefault();
-                if (this.emailContent.value.trim()) {
+                if (document.activeElement === this.emailContent && this.emailContent.value.trim()) {
+                    e.preventDefault(); // Prevent default newline
                     this.analyzeEmail();
                 }
             }
-            
+
             // Escape to close error
             if (e.key === 'Escape') {
                 this.hideError();
@@ -263,63 +125,35 @@ class EmailWise {
         });
     }
 
-    setupPasteHint() {
-        if (this.pasteHint) {
-            // Show paste hint when textarea is empty and focused
-            this.emailContent.addEventListener('focus', () => {
-                if (!this.emailContent.value.trim()) {
-                    this.showPasteHint();
-                }
+    async clearHistory() {
+        try {
+            const response = await fetch('/api/history/clear', {
+                method: 'POST'
             });
+            const result = await response.json();
 
-            this.emailContent.addEventListener('blur', () => {
-                this.hidePasteHint();
-            });
-        }
-    }
-
-    showPasteHint() {
-        if (this.pasteHint) {
-            this.pasteHint.classList.add('show');
-        }
-    }
-
-    hidePasteHint() {
-        if (this.pasteHint) {
-            this.pasteHint.classList.remove('show');
-        }
-    }
-
-    togglePasteHint() {
-        if (!this.emailContent.value.trim()) {
-            this.showPasteHint();
-        } else {
-            this.hidePasteHint();
+            if (result.success) {
+                this.loadHistory(); // Reload to show empty state
+            } else {
+                console.error('Failed to clear history:', result.error);
+                alert('Failed to clear history. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error clearing history:', error);
+            alert('An error occurred while clearing history.');
         }
     }
 
     updateCharacterCount() {
         if (this.charCount) {
             const count = this.emailContent.value.length;
-            this.charCount.textContent = count.toLocaleString();
-        }
-    }
-
-    showInputStats() {
-        if (this.inputStats) {
-            this.inputStats.classList.remove('d-none');
-        }
-    }
-
-    hideInputStats() {
-        if (this.inputStats && !this.emailContent.value.trim()) {
-            this.inputStats.classList.add('d-none');
+            this.charCount.textContent = `${count.toLocaleString()} characters`;
         }
     }
 
     async analyzeEmail() {
         const emailText = this.emailContent.value.trim();
-        
+
         if (!emailText) {
             this.showError('Please enter email content to analyze.');
             return;
@@ -357,65 +191,31 @@ class EmailWise {
     }
 
     displayResults(data, method) {
-        // Display enhanced results
-        this.displaySection(this.summaryContent, data.summary, 'No key points found in this email.');
-        this.displaySection(this.actionItemsContent, data.action_items, 'No action items identified in this email.');
-        this.displaySection(this.deadlinesContent, data.deadlines, 'No dates or deadlines found in this email.');
+        // Display results
+        this.displaySection(this.summaryContent, data.summary, 'No key points found.', 'fas fa-angle-right');
+        this.displaySection(this.actionItemsContent, data.action_items, 'No action items identified.', 'far fa-square');
+        this.displaySection(this.deadlinesContent, data.deadlines, 'No dates found.', 'far fa-clock');
 
-        // Update results metadata
-        this.updateResultsMeta(data, method);
-
-        // Show results section with enhanced animation
+        // Show results section
         this.resultsSection.classList.remove('d-none');
-        this.resultsSection.classList.add('fade-in');
+        this.resultsSection.classList.add('fade-in-up');
 
-        // Add staggered animation to result cards
-        const resultCards = this.resultsSection.querySelectorAll('.result-card');
-        resultCards.forEach((card, index) => {
-            card.style.animationDelay = `${index * 0.1}s`;
-            card.classList.add('fade-in');
-        });
-
-        // Smooth scroll to results with offset
+        // Smooth scroll to results
         setTimeout(() => {
             const rect = this.resultsSection.getBoundingClientRect();
-            const offset = 80; // Account for fixed headers
+            const offset = 80;
             window.scrollTo({
                 top: window.pageYOffset + rect.top - offset,
                 behavior: 'smooth'
             });
-        }, 200);
+        }, 100);
     }
 
-    updateResultsMeta(data, method) {
-        if (this.resultsMeta) {
-            const totalItems = (data.summary?.length || 0) + 
-                             (data.action_items?.length || 0) + 
-                             (data.deadlines?.length || 0);
-            
-            const methodBadge = method === 'openai' ? 
-                '<span class="badge bg-success">✨ AI Analysis</span>' : 
-                '<span class="badge bg-secondary">🔧 Local Analysis</span>';
-            
-            const analysisTime = new Date().toLocaleTimeString();
-            
-            this.resultsMeta.innerHTML = `
-                <div class="d-flex flex-wrap justify-content-center align-items-center gap-3">
-                    ${methodBadge}
-                    <span class="badge bg-info">${totalItems} items extracted</span>
-                    <small class="text-muted">Analyzed at ${analysisTime}</small>
-                </div>
-            `;
-        }
-    }
-
-    displaySection(container, items, emptyMessage) {
+    displaySection(container, items, emptyMessage, iconClass) {
         if (!items || items.length === 0) {
             container.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-info-circle"></i>
-                    <h5>No items found</h5>
-                    <p class="mb-0">${emptyMessage}</p>
+                <div class="text-muted opacity-75 small fst-italic py-2">
+                    ${emptyMessage}
                 </div>
             `;
             return;
@@ -423,21 +223,17 @@ class EmailWise {
 
         const listItems = items
             .filter(item => item && item.trim().length > 0)
-            .map((item, index) => `
-                <div class="result-item" style="animation-delay: ${index * 0.05}s">
-                    <i class="fas fa-check-circle"></i>
-                    <div class="result-item-text">${this.escapeHtml(item.trim())}</div>
+            .map(item => `
+                <div class="result-item d-flex gap-2">
+                    <div class="mt-1 text-primary opacity-75">
+                        <i class="${iconClass}"></i>
+                    </div>
+                    <div>${this.escapeHtml(item.trim())}</div>
                 </div>
             `)
             .join('');
 
-        container.innerHTML = listItems || `
-            <div class="empty-state">
-                <i class="fas fa-info-circle"></i>
-                <h5>No items found</h5>
-                <p class="mb-0">${emptyMessage}</p>
-            </div>
-        `;
+        container.innerHTML = listItems;
     }
 
     async loadHistory() {
@@ -449,57 +245,45 @@ class EmailWise {
                 this.displayHistory(result.data);
             } else {
                 this.historyContent.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-clock"></i>
-                        <p class="mb-0">No analysis history yet. Analyze an email to see it here.</p>
+                    <div class="text-center py-5 text-muted opacity-50">
+                        <i class="far fa-clock fa-2x mb-3"></i>
+                        <p>No recent analysis history</p>
                     </div>
                 `;
             }
         } catch (error) {
             console.error('Error loading history:', error);
-            this.historyContent.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <p class="mb-0">Error loading history. Please try again.</p>
-                </div>
-            `;
         }
     }
 
     displayHistory(historyItems) {
-        const historyHtml = historyItems.map((item, index) => `
-            <div class="history-item" style="animation-delay: ${index * 0.1}s">
+        const historyHtml = historyItems.map(item => `
+            <div class="history-item">
                 <div class="history-meta">
-                    <i class="fas fa-clock me-1"></i>
+                    <i class="far fa-clock"></i>
                     <span>${item.created_at}</span>
-                    <span class="badge bg-dark ms-auto">ID: ${item.id}</span>
+                    <span class="ms-auto badge bg-white bg-opacity-10 text-white fw-normal">ID: ${item.id}</span>
                 </div>
                 <div class="history-email-preview">
-                    ${this.escapeHtml(item.email_content)}
+                    "${this.escapeHtml(item.email_content)}"
                 </div>
                 <div class="history-results">
                     <div class="history-result-section">
                         <div class="history-result-title">Summary</div>
                         <div class="history-result-content">
-                            ${item.summary.length > 0 ? 
-                                item.summary.slice(0, 3).map(s => `<div class="result-item"><i class="fas fa-dot-circle"></i> ${this.escapeHtml(s)}</div>`).join('') : 
-                                '<div class="history-no-content">None found</div>'}
+                            ${item.summary.length} items
                         </div>
                     </div>
                     <div class="history-result-section">
-                        <div class="history-result-title">Action Items</div>
+                        <div class="history-result-title">Actions</div>
                         <div class="history-result-content">
-                            ${item.action_items.length > 0 ? 
-                                item.action_items.slice(0, 3).map(a => `<div class="result-item"><i class="fas fa-dot-circle"></i> ${this.escapeHtml(a)}</div>`).join('') : 
-                                '<div class="history-no-content">None found</div>'}
+                            ${item.action_items.length} items
                         </div>
                     </div>
                     <div class="history-result-section">
                         <div class="history-result-title">Deadlines</div>
                         <div class="history-result-content">
-                            ${item.deadlines.length > 0 ? 
-                                item.deadlines.slice(0, 3).map(d => `<div class="result-item"><i class="fas fa-dot-circle"></i> ${this.escapeHtml(d)}</div>`).join('') : 
-                                '<div class="history-no-content">None found</div>'}
+                            ${item.deadlines.length} items
                         </div>
                     </div>
                 </div>
@@ -507,129 +291,34 @@ class EmailWise {
         `).join('');
 
         this.historyContent.innerHTML = historyHtml;
-        
-        // Add fade-in animation to history items
-        const historyElements = this.historyContent.querySelectorAll('.history-item');
-        historyElements.forEach(item => {
-            item.classList.add('fade-in');
-        });
     }
 
     async copyToClipboard(button) {
         const targetId = button.getAttribute('data-target');
         const targetElement = document.getElementById(targetId);
-        
+
         if (!targetElement) return;
 
-        // Get text content from the target element
         const textContent = this.getPlainTextFromElement(targetElement);
-        
-        if (!textContent.trim()) {
-            this.showTemporaryToast('Nothing to copy', 'warning');
-            return;
-        }
+
+        if (!textContent.trim()) return;
 
         try {
             await navigator.clipboard.writeText(textContent);
-            
-            // Enhanced visual feedback
-            const originalHtml = button.innerHTML;
-            const originalClasses = button.className;
-            
-            button.innerHTML = '<i class="fas fa-check"></i>';
-            button.classList.add('copied');
-            
-            // Show success toast
-            this.showTemporaryToast(`Copied ${textContent.split('\n').length} items`, 'success');
-            
+
+            // Visual feedback
+            const icon = button.querySelector('i');
+            const originalClass = icon.className;
+
+            icon.className = 'fas fa-check text-success';
+
             setTimeout(() => {
-                button.innerHTML = originalHtml;
-                button.className = originalClasses;
+                icon.className = originalClass;
             }, 2000);
-            
+
         } catch (error) {
             console.error('Copy failed:', error);
-            
-            // Fallback for older browsers
-            this.fallbackCopyTextToClipboard(textContent, button);
         }
-    }
-
-    fallbackCopyTextToClipboard(text, button) {
-        const textArea = document.createElement('textarea');
-        textArea.value = text;
-        textArea.style.position = 'fixed';
-        textArea.style.left = '-999999px';
-        textArea.style.top = '-999999px';
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-
-        try {
-            document.execCommand('copy');
-            this.showTemporaryToast('Copied successfully', 'success');
-            
-            // Visual feedback for button
-            const originalHtml = button.innerHTML;
-            button.innerHTML = '<i class="fas fa-check"></i>';
-            button.classList.add('copied');
-            
-            setTimeout(() => {
-                button.innerHTML = originalHtml;
-                button.classList.remove('copied');
-            }, 2000);
-            
-        } catch (err) {
-            this.showTemporaryToast('Copy failed - please select text manually', 'error');
-        }
-
-        document.body.removeChild(textArea);
-    }
-
-    showTemporaryToast(message, type = 'info') {
-        // Create toast element if it doesn't exist
-        let toast = document.getElementById('toast-notification');
-        if (!toast) {
-            toast = document.createElement('div');
-            toast.id = 'toast-notification';
-            toast.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                padding: 12px 20px;
-                border-radius: 8px;
-                color: white;
-                font-weight: 500;
-                font-size: 0.9rem;
-                z-index: 9999;
-                transform: translateX(100%);
-                transition: transform 0.3s ease;
-                max-width: 300px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            `;
-            document.body.appendChild(toast);
-        }
-
-        // Set toast style based on type
-        const colors = {
-            success: '#28a745',
-            error: '#dc3545',
-            warning: '#ffc107',
-            info: '#17a2b8'
-        };
-
-        toast.style.backgroundColor = colors[type] || colors.info;
-        toast.textContent = message;
-
-        // Show toast
-        setTimeout(() => {
-            toast.style.transform = 'translateX(0)';
-        }, 100);
-
-        // Hide toast
-        setTimeout(() => {
-            toast.style.transform = 'translateX(100%)';
-        }, 3000);
     }
 
     getPlainTextFromElement(element) {
@@ -637,16 +326,20 @@ class EmailWise {
         const resultItems = element.querySelectorAll('.result-item');
         if (resultItems.length > 0) {
             return Array.from(resultItems)
-                .map(item => `• ${item.textContent.trim()}`)
+                .map(item => {
+                    // Get text from the second div (the content div), skipping the icon div
+                    const contentDiv = item.children[1];
+                    return `• ${contentDiv.textContent.trim()}`;
+                })
                 .join('\n');
         }
-        
-        // Fallback to element text content
+
         return element.textContent.trim();
     }
 
     clearForm() {
         this.emailContent.value = '';
+        this.updateCharacterCount();
         this.hideResults();
         this.hideError();
         this.emailContent.focus();
@@ -654,80 +347,30 @@ class EmailWise {
 
     showLoading(show) {
         if (show) {
-            this.loadingIndicator.classList.remove('d-none');
             this.analyzeBtn.disabled = true;
-            
-            // Enhanced button loading state
-            if (this.btnContent && this.btnLoadingSpinner) {
-                this.btnContent.classList.add('d-none');
-                this.btnLoadingSpinner.classList.remove('d-none');
-            }
-            
-            // Dynamic loading messages
-            this.updateLoadingMessage();
-            
-            // Start loading message rotation
-            this.loadingMessageInterval = setInterval(() => {
-                this.updateLoadingMessage();
-            }, 2000);
-            
+            if (this.btnText) this.btnText.classList.add('d-none');
+            if (this.btnLoadingSpinner) this.btnLoadingSpinner.classList.remove('d-none');
         } else {
-            this.loadingIndicator.classList.add('d-none');
             this.analyzeBtn.disabled = false;
-            
-            // Reset button state
-            if (this.btnContent && this.btnLoadingSpinner) {
-                this.btnContent.classList.remove('d-none');
-                this.btnLoadingSpinner.classList.add('d-none');
-            }
-            
-            // Clear loading message interval
-            if (this.loadingMessageInterval) {
-                clearInterval(this.loadingMessageInterval);
-            }
-        }
-    }
-
-    updateLoadingMessage() {
-        if (this.loadingMessage) {
-            const messages = [
-                'Processing email content...',
-                'Extracting key information...',
-                'Analyzing action items...',
-                'Finding deadlines...',
-                'Generating summary...',
-                'Almost done...'
-            ];
-            
-            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-            this.loadingMessage.textContent = randomMessage;
+            if (this.btnText) this.btnText.classList.remove('d-none');
+            if (this.btnLoadingSpinner) this.btnLoadingSpinner.classList.add('d-none');
         }
     }
 
     showError(message) {
         this.errorMessage.textContent = message;
         this.errorAlert.classList.remove('d-none');
-        this.errorAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Small delay to allow display to update before adding opacity for fade-in
+        setTimeout(() => this.errorAlert.classList.add('show'), 10);
     }
 
     hideError() {
         this.errorAlert.classList.add('d-none');
+        this.errorAlert.classList.remove('show');
     }
 
     hideResults() {
         this.resultsSection.classList.add('d-none');
-        this.resultsSection.classList.remove('fade-in');
-        
-        // Remove method badges
-        const badges = document.querySelectorAll('.badge');
-        badges.forEach(badge => badge.remove());
-    }
-
-    autoResizeTextarea() {
-        const textarea = this.emailContent;
-        textarea.style.height = 'auto';
-        const newHeight = Math.max(200, Math.min(textarea.scrollHeight, 400));
-        textarea.style.height = newHeight + 'px';
     }
 
     escapeHtml(text) {

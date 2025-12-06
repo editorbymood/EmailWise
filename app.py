@@ -115,5 +115,27 @@ def get_history():
             'error': 'An error occurred while retrieving history.'
         }), 500
 
+@app.route('/api/history/clear', methods=['POST'])
+def clear_history():
+    """API endpoint to clear all analysis history"""
+    try:
+        from models import EmailSummary
+        # Delete all records
+        db.session.query(EmailSummary).delete()
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'History cleared successfully'
+        })
+        
+    except Exception as e:
+        app.logger.error(f"Error clearing history: {str(e)}")
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'error': 'An error occurred while clearing history.'
+        }), 500
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
