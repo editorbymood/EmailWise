@@ -123,6 +123,85 @@ class EmailWise {
                 this.hideError();
             }
         });
+
+        // Chat Button
+        const chatBtn = document.getElementById('chatSendBtn');
+        if (chatBtn) {
+            chatBtn.addEventListener('click', () => this.handleChatQuery());
+        }
+
+        const chatInput = document.getElementById('chatInput');
+        if (chatInput) {
+            chatInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') this.handleChatQuery();
+            });
+        }
+
+        // Quick Action Buttons
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const action = e.currentTarget.dataset.action;
+                this.handleQuickAction(action, e.currentTarget);
+            });
+        });
+    }
+
+    async handleChatQuery() {
+        const input = document.getElementById('chatInput');
+        const history = document.getElementById('chatHistory');
+        const query = input.value.trim();
+
+        if (!query) return;
+
+        // Add User Message
+        const userDiv = document.createElement('div');
+        userDiv.className = 'd-flex justify-content-end mb-3';
+        userDiv.innerHTML = `<div class="bg-primary text-white p-2 px-3 rounded-pill small">${this.escapeHtml(query)}</div>`;
+        history.appendChild(userDiv);
+
+        input.value = '';
+        history.scrollTop = history.scrollHeight;
+
+        input.value = '';
+        history.scrollTop = history.scrollHeight;
+
+        // Show loading placeholder
+        const loadingDiv = document.createElement('div');
+        loadingDiv.id = 'chatLoading';
+        loadingDiv.className = 'd-flex justify-content-start mb-3';
+        loadingDiv.innerHTML = `<div class="glass-card p-2 px-3 rounded-3 small text-white border-0"><i class="fas fa-circle-notch fa-spin me-2"></i>Thinking...</div>`;
+        history.appendChild(loadingDiv);
+        history.scrollTop = history.scrollHeight;
+
+        try {
+            const emailText = document.getElementById('emailContent').value;
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email_content: emailText,
+                    query: query
+                })
+            });
+
+            const result = await response.json();
+
+            // Remove loading
+            loadingDiv.remove();
+
+            // Show Answer
+            const answer = result.success ? result.answer : "Sorry, I couldn't get an answer right now.";
+
+            const aiDiv = document.createElement('div');
+            aiDiv.className = 'd-flex justify-content-start mb-3';
+            aiDiv.innerHTML = `<div class="glass-card p-2 px-3 rounded-3 small text-white border-0">${this.escapeHtml(answer)}</div>`;
+            history.appendChild(aiDiv);
+            history.scrollTop = history.scrollHeight;
+
+        } catch (error) {
+            if (document.getElementById('chatLoading')) document.getElementById('chatLoading').remove();
+            console.error('Chat error:', error);
+        }
     }
 
     async clearHistory() {
@@ -144,7 +223,54 @@ class EmailWise {
         }
     }
 
-    updateCharacterCount() {
+    handleFileUpload() {
+        const fileInput = document.getElementById('attachmentInput');
+        const fileList = document.getElementById('fileList');
+
+        if (!fileInput || !fileList) return;
+
+        fileList.innerHTML = '';
+        const files = Array.from(fileInput.files);
+
+        if (files.length === 0) return;
+
+        files.forEach(file => {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'd-flex align-items-center gap-2 mb-1';
+            fileItem.innerHTML = `
+                <i class="fas fa-file-alt text-primary"></i>
+                <span>${this.escapeHtml(file.name)}</span>
+                <span class="text-muted ms-2">(${(file.size / 1024).toFixed(1)} KB)</span>
+            `;
+            fileList.appendChild(fileItem);
+        });
+    }
+
+    attachEventListeners() {
+        // Form submission
+        this.emailForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.analyzeEmail();
+        });
+
+        // File Upload Trigger
+        const uploadTrigger = document.getElementById('uploadTrigger');
+        const fileInput = document.getElementById('attachmentInput');
+
+        if (uploadTrigger && fileInput) {
+            uploadTrigger.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', () => {
+                this.handleFileUpload();
+            });
+        }
+
+        // Clear button
+        this.clearBtn.addEventListener('click', () => {
+            this.clearForm();
+        });
         if (this.charCount) {
             const count = this.emailContent.value.length;
             this.charCount.textContent = `${count.toLocaleString()} characters`;
@@ -164,19 +290,35 @@ class EmailWise {
         this.hideResults();
 
         try {
+            const analysisOptions = {
+                summary_style: document.getElementById('summaryStyle').value,
+                output_language: document.getElementById('outputLanguage').value,
+                reply_tone: document.getElementById('replyTone').value
+            };
+
+            // Use FormData to support attachments
+            const formData = new FormData();
+            formData.append('email_content', emailText);
+            formData.append('analysis_options', JSON.stringify(analysisOptions));
+
+            // Append files
+            const fileInput = document.getElementById('attachmentInput');
+            if (fileInput && fileInput.files.length > 0) {
+                Array.from(fileInput.files).forEach(file => {
+                    formData.append('attachments', file);
+                });
+            }
+
             const response = await fetch('/api/analyze', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    email_content: emailText
-                })
+                // Do NOT set Content-Type header when sending FormData
+                body: formData
             });
 
             const result = await response.json();
 
             if (result.success) {
+                this.currentSummaryId = result.id; // Store ID for actions
                 this.displayResults(result.data, result.method);
                 this.loadHistory(); // Refresh history after successful analysis
             } else {
@@ -190,11 +332,61 @@ class EmailWise {
         }
     }
 
+    async handleQuickAction(action, button) {
+        if (!this.currentSummaryId) {
+            alert('No active email analysis found.');
+            return;
+        }
+
+        const originalHtml = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        button.disabled = true;
+
+        try {
+            const response = await fetch('/api/action', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: this.currentSummaryId,
+                    action: action
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Success feedback
+                button.innerHTML = '<i class="fas fa-check"></i> Done';
+                button.classList.remove('btn-outline-light-soft');
+                button.classList.add('btn-success');
+
+                // Revert after 2s
+                setTimeout(() => {
+                    button.innerHTML = originalHtml;
+                    button.classList.remove('btn-success');
+                    button.classList.add('btn-outline-light-soft');
+                    button.disabled = false;
+                }, 2000);
+            } else {
+                alert(result.error || 'Action failed');
+                button.innerHTML = originalHtml;
+                button.disabled = false;
+            }
+        } catch (error) {
+            console.error('Action error:', error);
+            button.innerHTML = originalHtml;
+            button.disabled = false;
+        }
+    }
+
     displayResults(data, method) {
         // Display results
         this.displaySection(this.summaryContent, data.summary, 'No key points found.', 'fas fa-angle-right');
         this.displaySection(this.actionItemsContent, data.action_items, 'No action items identified.', 'far fa-square');
         this.displaySection(this.deadlinesContent, data.deadlines, 'No dates found.', 'far fa-clock');
+
+        // Intelligence Pipeline
+        this.updateIntelligence(data);
 
         // Show results section
         this.resultsSection.classList.remove('d-none');
@@ -211,6 +403,117 @@ class EmailWise {
         }, 100);
     }
 
+    updateIntelligence(data) {
+        // 1. HUD Updates
+        this.updateText('intentBadge', data.intent || 'General');
+        this.updateUrgency(data.urgency_score);
+        this.updateSentiment(data.sentiment);
+        this.updateText('confidenceBadge', `${Math.round((data.confidence_score || 0) * 100)}%`);
+
+        // 2. Spam Alert
+        const spamInfo = data.spam_analysis || {};
+        const spamAlert = document.getElementById('spamAlert');
+        if (spamInfo.is_spam) {
+            document.getElementById('spamReason').textContent = spamInfo.reason || 'Suspicious content detected.';
+            spamAlert.classList.remove('d-none');
+        } else {
+            spamAlert.classList.add('d-none');
+        }
+
+        // 3. Decision Card
+        const riskData = data.risk_assessment || {};
+        const decisionCard = document.getElementById('decisionCard');
+        const hasDecisionData = (riskData.pros?.length > 0 || riskData.cons?.length > 0 || riskData.risks?.length > 0);
+
+        if (hasDecisionData) {
+            decisionCard.classList.remove('d-none');
+            this.renderList('prosList', riskData.pros);
+            this.renderList('consList', riskData.cons);
+            this.renderList('risksList', riskData.risks);
+        } else {
+            decisionCard.classList.add('d-none');
+        }
+
+        // 4. Reply
+        const replyData = data.suggested_replies ? data : data.suggested_reply;
+        this.updateReply(replyData);
+    }
+
+    updateUrgency(score) {
+        const badge = document.getElementById('urgencyBadge');
+        if (!badge) return;
+
+        score = parseInt(score) || 0;
+        let colorClass = 'text-success';
+
+        if (score >= 8) colorClass = 'text-danger';
+        else if (score >= 5) colorClass = 'text-warning';
+
+        badge.className = `fw-bold fs-3 ${colorClass}`;
+        badge.textContent = `${score}/10`;
+    }
+
+    updateSentiment(sentiment) {
+        const badge = document.getElementById('sentimentBadge');
+        if (!badge) return;
+
+        const sentimentLower = (sentiment || '').toLowerCase();
+        let emoji = '😐'; // Neutral
+        if (sentimentLower.includes('happy') || sentimentLower.includes('friendly') || sentimentLower.includes('positive') || sentimentLower.includes('enthusiastic')) emoji = '😊';
+        else if (sentimentLower.includes('angry') || sentimentLower.includes('frustrated') || sentimentLower.includes('annoyed')) emoji = '😠';
+        else if (sentimentLower.includes('urgent') || sentimentLower.includes('anxious') || sentimentLower.includes('concerned')) emoji = '😟';
+        else if (sentimentLower.includes('professional') || sentimentLower.includes('formal')) emoji = '👔';
+        else if (sentimentLower.includes('passive')) emoji = '🙄';
+
+        badge.innerHTML = `<span class="fs-4 me-2">${emoji}</span><span class="fw-medium">${sentiment || 'Neutral'}</span>`;
+    }
+
+    updateText(id, text) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = text;
+    }
+
+    renderList(id, items) {
+        const list = document.getElementById(id);
+        if (!list) return;
+
+        if (!items || items.length === 0) {
+            list.innerHTML = '<li class="text-muted fst-italic opacity-50">None identified</li>';
+            return;
+        }
+
+        list.innerHTML = items.map(item => `<li>${this.escapeHtml(item)}</li>`).join('');
+    }
+
+    updateReply(data) {
+        // Handle explicit multiple replies structure
+        if (data && data.suggested_replies) {
+            const reply1 = document.getElementById('replyContent1');
+            const reply2 = document.getElementById('replyContent2');
+            const label1 = document.getElementById('reply-1-tab');
+            const label2 = document.getElementById('reply-2-tab');
+
+            if (reply1) reply1.innerText = data.suggested_replies.option_1 || 'No draft generated.';
+            if (reply2) reply2.innerText = data.suggested_replies.option_2 || 'No draft generated.';
+
+            if (label1) label1.innerText = data.suggested_replies.option_1_label || 'Option 1';
+            if (label2) label2.innerText = data.suggested_replies.option_2_label || 'Option 2';
+
+            return;
+        }
+
+        // Fallback for single reply (legacy or local)
+        const singleReply = typeof data === 'string' ? data : (data?.suggested_reply || '');
+        const reply1 = document.getElementById('replyContent1');
+        if (reply1) reply1.innerText = singleReply || 'No suggested reply generated.';
+
+        // Hide second tab if only single reply exists
+        const tab2 = document.getElementById('reply-2-tab');
+        if (tab2 && !data?.suggested_replies) {
+            tab2.style.display = 'none';
+        }
+    }
+
     displaySection(container, items, emptyMessage, iconClass) {
         if (!items || items.length === 0) {
             container.innerHTML = `
@@ -221,16 +524,27 @@ class EmailWise {
             return;
         }
 
+        const isDeadlines = container.id === 'deadlinesContent';
+
         const listItems = items
             .filter(item => item && item.trim().length > 0)
-            .map(item => `
-                <div class="result-item d-flex gap-2">
-                    <div class="mt-1 text-primary opacity-75">
+            .map(item => {
+                let extraContent = '';
+                if (isDeadlines) {
+                    const encodedTitle = encodeURIComponent('Task Deadline: ' + item);
+                    const calUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodedTitle}`;
+                    extraContent = `<a href="${calUrl}" target="_blank" class="ms-auto btn btn-xs btn-outline-light-soft" title="Add to Google Calendar"><i class="fas fa-calendar-plus"></i></a>`;
+                }
+
+                return `
+                <div class="result-item d-flex gap-2 align-items-start mb-2">
+                    <div class="mt-1 text-primary opacity-75 flex-shrink-0">
                         <i class="${iconClass}"></i>
                     </div>
-                    <div>${this.escapeHtml(item.trim())}</div>
+                    <div class="flex-grow-1">${this.escapeHtml(item.trim())}</div>
+                    ${extraContent}
                 </div>
-            `)
+            `})
             .join('');
 
         container.innerHTML = listItems;
