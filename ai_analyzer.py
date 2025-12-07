@@ -167,7 +167,7 @@ class EmailAnalyzer:
         Interactive chat with the email context.
         """
         if not self.client:
-             return "I can only answer questions in online mode with an API key."
+             return {"answer": "I can only answer questions in online mode with an API key."}
 
         try:
             prompt = f"""
@@ -188,11 +188,13 @@ class EmailAnalyzer:
                 ],
                 max_tokens=300
             )
-            return response.choices[0].message.content
+            return {"answer": response.choices[0].message.content}
             
         except Exception as e:
             self.logger.error(f"Chat error: {str(e)}")
-            return "I encountered an error trying to answer that."
+            return {"answer": "I encountered an error trying to answer that."}
+
+
 
     def _local_analysis(self, content, style="detailed", tone="professional"):
         """Fallback rule-based analysis."""
