@@ -4,7 +4,7 @@ import logging
 import re
 from datetime import datetime
 from openai import OpenAI
-import pdfminer.high_level
+from pypdf import PdfReader
 import mammoth
 import io
 
@@ -39,8 +39,11 @@ class EmailAnalyzer:
             filename = file.filename.lower()
             try:
                 if filename.endswith('.pdf'):
-                    # Use pdfminer to extract text
-                    text = pdfminer.high_level.extract_text(file.stream)
+                    # Use pypdf to extract text
+                    reader = PdfReader(file.stream)
+                    text = ""
+                    for page in reader.pages:
+                        text += page.extract_text() + "\n"
                     attachment_text += f"\n\n--- Attachment: {file.filename} ---\n{text}"
                 elif filename.endswith('.docx'):
                     # Use mammoth to extract raw text
