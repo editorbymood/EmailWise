@@ -1,263 +1,625 @@
-/* EmailWise Premium Glass UI v3.0 */
+/* EmailWise Premium Glass UI v4.0 */
 
-/* Variables & Theme Setup */
+/* -----------------------------------------------------------------------------
+   1. Theme & Variables
+----------------------------------------------------------------------------- */
 :root {
+    /* Colors */
     --primary-hue: 250;
     --accent-hue: 190;
-    --primary-color: hsl(var(--primary-hue), 100%, 70%);
-    --accent-color: hsl(var(--accent-hue), 100%, 60%);
+    --primary-color: hsl(var(--primary-hue), 95%, 70%);
+    --primary-dark: hsl(var(--primary-hue), 60%, 50%);
+    --accent-color: hsl(var(--accent-hue), 90%, 60%);
 
-    --bg-deep: #050608;
-    --bg-card: rgba(255, 255, 255, 0.02);
+    --success-color: #00d2aa;
+    --warning-color: #f7b731;
+    --danger-color: #eb3b5a;
+    --info-color: #0fb9b1;
+
+    --bg-deep: #030407;
+    --bg-overlay: rgba(0, 0, 0, 0.4);
+
+    /* Glass Layering */
+    --glass-nav: rgba(5, 5, 10, 0.7);
+    --glass-card: rgba(255, 255, 255, 0.03);
+    --glass-input: rgba(0, 0, 0, 0.4);
     --glass-border: rgba(255, 255, 255, 0.08);
-    --glass-highlight: rgba(255, 255, 255, 0.15);
+    --glass-highlight: rgba(255, 255, 255, 0.12);
 
-    --text-main: #ffffff;
-    --text-muted: rgba(255, 255, 255, 0.6);
-
-    --blur-xl: 30px;
-    --blur-md: 12px;
-
+    /* Typography */
     --font-heading: 'Outfit', sans-serif;
     --font-body: 'Inter', sans-serif;
 
+    /* Text Colors */
+    --text-white: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.55);
+
+    /* Effects */
+    --blur-xl: 40px;
+    --blur-md: 16px;
+    --blur-sm: 8px;
     --radius-xl: 32px;
     --radius-lg: 20px;
+    --radius-md: 12px;
 
-    --ease-elastic: cubic-bezier(0.4, 0, 0.2, 1);
-    --ease-bounce: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    --shadow-card: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+    --shadow-glow: 0 0 20px rgba(130, 80, 255, 0.3);
+
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-/* 1. Global Reset & Typography */
+/* -----------------------------------------------------------------------------
+   2. Global Reset
+----------------------------------------------------------------------------- */
 body {
     background-color: var(--bg-deep);
-    color: var(--text-main);
+    color: var(--text-white);
     font-family: var(--font-body);
     font-weight: 300;
-    min-height: 100vh;
+    line-height: 1.6;
     overflow-x: hidden;
-    position: relative;
-    background-image:
-        radial-gradient(circle at 10% 10%, rgba(50, 20, 100, 0.2), transparent 40%),
-        radial-gradient(circle at 90% 90%, rgba(20, 50, 100, 0.2), transparent 40%);
+    min-height: 100vh;
 }
 
 h1,
 h2,
 h3,
 h4,
-h5 {
+h5,
+h6 {
     font-family: var(--font-heading);
     font-weight: 700;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.025em;
+    color: var(--text-white);
 }
 
-/* 2. Advanced Background Animations */
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: color 0.2s;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+/* -----------------------------------------------------------------------------
+   3. Background & Animation
+----------------------------------------------------------------------------- */
 .bg-canvas {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
+    inset: 0;
     z-index: -1;
     overflow: hidden;
+    background: radial-gradient(circle at top center, #1a103c 0%, #030407 100%);
+}
+
+.grid-overlay {
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    opacity: 0.3;
+    pointer-events: none;
 }
 
 .orb {
     position: absolute;
     border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.5;
-    animation: orbFloat 20s infinite ease-in-out alternate;
+    filter: blur(100px);
+    opacity: 0.4;
+    animation: floatOrb 25s infinite ease-in-out alternate;
 }
 
 .orb-1 {
     width: 600px;
     height: 600px;
-    background: radial-gradient(circle, var(--primary-color), transparent 70%);
-    top: -100px;
-    left: -100px;
-    animation-duration: 25s;
+    background: var(--primary-color);
+    top: -10%;
+    left: -5%;
+    opacity: 0.25;
 }
 
 .orb-2 {
     width: 500px;
     height: 500px;
-    background: radial-gradient(circle, var(--accent-color), transparent 70%);
-    bottom: -50px;
-    right: -100px;
-    animation-duration: 30s;
+    background: var(--accent-color);
+    bottom: -10%;
+    right: -5%;
     animation-delay: -5s;
+    opacity: 0.2;
 }
 
 .orb-3 {
     width: 300px;
     height: 300px;
-    background: radial-gradient(circle, #ff3c64, transparent 70%);
+    background: #ff3c64;
     top: 40%;
     left: 50%;
     transform: translate(-50%, -50%);
-    opacity: 0.3;
-    animation-name: orbPulse;
-    animation-duration: 15s;
+    opacity: 0.15;
+    animation-duration: 20s;
 }
 
-@keyframes orbFloat {
+@keyframes floatOrb {
     0% {
         transform: translate(0, 0) scale(1);
     }
 
     100% {
-        transform: translate(50px, 30px) scale(1.1);
+        transform: translate(30px, -30px) scale(1.1);
     }
 }
 
-@keyframes orbPulse {
-    0% {
-        transform: translate(-50%, -50%) scale(1);
-        opacity: 0.2;
-    }
-
-    50% {
-        transform: translate(-50%, -50%) scale(1.3);
-        opacity: 0.4;
-    }
-
-    100% {
-        transform: translate(-50%, -50%) scale(1);
-        opacity: 0.2;
-    }
+/* -----------------------------------------------------------------------------
+   4. Glass Components
+----------------------------------------------------------------------------- */
+.glass-nav {
+    background: var(--glass-nav);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--glass-border);
+    padding: 1rem 0;
 }
 
-/* 3. Glass Card System */
 .glass-card {
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+    background: var(--glass-card);
     backdrop-filter: blur(var(--blur-xl));
     -webkit-backdrop-filter: blur(var(--blur-xl));
     border: 1px solid var(--glass-border);
     border-top: 1px solid var(--glass-highlight);
     border-radius: var(--radius-lg);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    transition: all 0.4s var(--ease-elastic);
+    box-shadow: var(--shadow-card);
+    transition: transform 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
 }
 
 .glass-card:hover {
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
-    border-color: rgba(255, 255, 255, 0.15);
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.02) 100%);
+    /* Subtle lift on hover disabled for main panel */
 }
 
-/* 4. Inputs & Controls */
 .glass-input {
-    background: rgba(0, 0, 0, 0.3) !important;
+    background: var(--glass-input) !important;
     border: 1px solid var(--glass-border) !important;
     color: white !important;
-    border-radius: 12px !important;
-    padding: 1.2rem !important;
-    transition: all 0.3s ease;
-    font-size: 1rem;
-    backdrop-filter: blur(10px);
+    border-radius: var(--radius-md) !important;
+    padding: 1rem !important;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    resize: none;
 }
 
 .glass-input:focus {
-    background: rgba(0, 0, 0, 0.5) !important;
+    background: rgba(0, 0, 0, 0.6) !important;
     border-color: var(--primary-color) !important;
-    box-shadow: 0 0 0 4px rgba(120, 80, 255, 0.15) !important;
+    box-shadow: 0 0 0 3px rgba(120, 80, 255, 0.15) !important;
 }
 
 .glass-select {
-    background-color: rgba(0, 0, 0, 0.3) !important;
-    border-color: var(--glass-border) !important;
+    background-color: var(--glass-input) !important;
+    border: 1px solid var(--glass-border) !important;
     color: white !important;
-    border-radius: 8px !important;
+    border-radius: var(--radius-md) !important;
+    padding: 0.75rem 1rem !important;
+    cursor: pointer;
 }
 
-/* 5. Buttons with Glow */
+.glass-btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    color: var(--text-white);
+    border-radius: 50px;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+.glass-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: white;
+}
+
+.glass-btn-sm {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid transparent;
+    color: var(--text-muted);
+}
+
+.glass-btn-sm:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.glass-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    font-size: 0.85rem;
+    backdrop-filter: blur(10px);
+}
+
+.glass-alert-danger {
+    background: rgba(235, 59, 90, 0.15);
+    border: 1px solid rgba(235, 59, 90, 0.3);
+    color: #ff879d;
+    border-radius: var(--radius-md);
+}
+
+.glass-alert-warning {
+    background: rgba(247, 183, 49, 0.15);
+    border: 1px solid rgba(247, 183, 49, 0.3);
+    color: #ffd06a;
+    border-radius: var(--radius-md);
+}
+
+/* -----------------------------------------------------------------------------
+   5. Layout & Grid utilities
+----------------------------------------------------------------------------- */
+.main-wrapper {
+    padding-top: 80px;
+    /* Space for fixed navbar */
+    min-height: 100vh;
+}
+
+.settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+}
+
+.grid-cols-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+}
+
+.input-group-wrapper {
+    position: relative;
+}
+
+.char-counter {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    background: rgba(0, 0, 0, 0.5);
+    padding: 2px 8px;
+    border-radius: 4px;
+    pointer-events: none;
+}
+
+/* -----------------------------------------------------------------------------
+   6. Buttons & Interactive Elements
+----------------------------------------------------------------------------- */
 .btn-primary {
-    background: linear-gradient(135deg, var(--primary-color) 0%, hsl(var(--primary-hue), 100%, 60%) 100%);
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
     border: none;
     color: white;
-    font-weight: 600;
-    padding: 0.8rem 2rem;
     border-radius: 50px;
-    letter-spacing: 0.02em;
     position: relative;
     overflow: hidden;
     z-index: 1;
-    transition: all 0.3s ease;
-}
-
-.btn-primary::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
-    z-index: -1;
-    transition: opacity 0.3s ease;
-    opacity: 0;
+    transition: all 0.3s var(--ease-out);
+    box-shadow: 0 4px 15px rgba(100, 80, 255, 0.3);
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 40px -10px var(--primary-color);
+    box-shadow: 0 8px 25px rgba(100, 80, 255, 0.5);
 }
 
-.btn-primary:hover::before {
+.btn-icon-only {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.btn-glow {
+    position: relative;
+}
+
+.btn-glow::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 60%);
+    opacity: 0;
+    transform: scale(0.5);
+    transition: transform 0.5s, opacity 0.5s;
+    pointer-events: none;
+}
+
+.btn-glow:hover::after {
     opacity: 1;
+    transform: scale(1);
 }
 
-.btn-outline-light-soft {
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: var(--text-muted);
-    transition: all 0.2s ease;
-}
-
-.btn-outline-light-soft:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-    border-color: white;
-}
-
-/* 6. Typography Gradients & Effects */
 .text-gradient-main {
-    background: linear-gradient(135deg, #fff 0%, #b8c6fa 100%);
+    background: linear-gradient(to right, #fff, #b8c6fa);
     -webkit-background-clip: text;
-    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
 .text-gradient-primary {
-    background: linear-gradient(135deg, #a881ff 0%, #65c7f7 100%);
+    background: linear-gradient(135deg, #a881ff, #65c7f7);
     -webkit-background-clip: text;
-    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
-/* 7. Animations - Entrance */
+/* -----------------------------------------------------------------------------
+   7. Results & Specific Components
+----------------------------------------------------------------------------- */
+.glass-tabs .nav-link {
+    background: transparent;
+    color: var(--text-muted);
+    border: none;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
+    padding: 1rem;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+
+.glass-tabs .nav-link:hover {
+    color: white;
+}
+
+.glass-tabs .nav-link.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.result-list {
+    white-space: pre-wrap;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.reply-box {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    padding: 1rem;
+    font-family: 'Inter', monospace;
+    font-size: 0.9rem;
+    color: #e0e0e0;
+    white-space: pre-wrap;
+}
+
+.metric-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+}
+
+.badge-soft {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.8rem;
+}
+
+/* Decision Box */
+.decision-box {
+    padding: 10px;
+    border-radius: 8px;
+    height: 100%;
+}
+
+.decision-box.success {
+    background: rgba(0, 210, 170, 0.05);
+    border: 1px solid rgba(0, 210, 170, 0.1);
+}
+
+.decision-box.danger {
+    background: rgba(235, 59, 90, 0.05);
+    border: 1px solid rgba(235, 59, 90, 0.1);
+}
+
+.decision-icon {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    text-align: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    font-size: 10px;
+    line-height: 20px;
+    margin-right: 5px;
+}
+
+/* -----------------------------------------------------------------------------
+   8. Utilities & Animations
+----------------------------------------------------------------------------- */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.tracking-tight {
+    letter-spacing: -0.02em;
+}
+
+.tracking-tighter {
+    letter-spacing: -0.04em;
+}
+
+.text-xs {
+    font-size: 0.75rem;
+}
+
+.text-primary-light {
+    color: #a881ff;
+}
+
+.text-danger-soft {
+    color: #ff6b6b;
+}
+
+/* Entrance Animation */
 .animate-enter {
+    animation: fadeUp .8s var(--ease-out) forwards;
     opacity: 0;
-    animation: fadeInUp 0.8s var(--ease-bounce) forwards;
 }
 
 .delay-100 {
-    animation-delay: 100ms;
+    animation-delay: 0.1s;
 }
 
 .delay-200 {
-    animation-delay: 200ms;
+    animation-delay: 0.2s;
 }
 
 .delay-300 {
-    animation-delay: 300ms;
+    animation-delay: 0.3s;
 }
 
-@keyframes fadeInUp {
+/* 10. Advanced Micro-Interactions */
+
+/* Shimmer Effect for Primary Button */
+@keyframes shimmer {
+    0% {
+        background-position: -200% center;
+    }
+
+    100% {
+        background-position: 200% center;
+    }
+}
+
+.btn-shimmer {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #a881ff 25%, #fff 50%, #a881ff 75%, var(--primary-color) 100%);
+    background-size: 200% auto;
+    animation: shimmer 3s linear infinite;
+    color: white;
+    border: none;
+    box-shadow: 0 0 20px rgba(168, 129, 255, 0.4);
+}
+
+.btn-shimmer:hover {
+    animation: shimmer 1.5s linear infinite;
+    /* Speed up on hover */
+    box-shadow: 0 0 30px rgba(168, 129, 255, 0.6);
+}
+
+/* Staggered Entrance for Lists */
+.stagger-item {
+    opacity: 0;
+    animation: slideInRight 0.5s var(--ease-out) forwards;
+}
+
+@keyframes slideInRight {
     from {
         opacity: 0;
-        transform: translateY(40px);
+        transform: translateX(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Glass Toast Notification */
+.toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 1050;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.glass-toast {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(20, 20, 30, 0.6);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    transform: translateY(20px);
+    opacity: 0;
+    animation: toastEnter 0.4s var(--ease-out) forwards;
+}
+
+.glass-toast.hiding {
+    animation: toastExit 0.4s var(--ease-out) forwards;
+}
+
+.glass-toast i {
+    font-size: 1.1rem;
+}
+
+@keyframes toastEnter {
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes toastExit {
+    to {
+        transform: translateY(10px);
+        opacity: 0;
+    }
+}
+
+/* Input Focus Glow Pulse */
+.glass-input:focus-within {
+    animation: glowPulse 2s infinite alternate;
+}
+
+@keyframes glowPulse {
+    from {
+        box-shadow: 0 0 0 3px rgba(120, 80, 255, 0.15);
+    }
+
+    to {
+        box-shadow: 0 0 0 6px rgba(120, 80, 255, 0.25);
+    }
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
     }
 
     to {
@@ -266,52 +628,84 @@ h5 {
     }
 }
 
-/* 8. Result Cards */
-.result-group {
-    display: grid;
-    gap: 1.5rem;
+/* Responsive */
+@media (max-width: 991px) {
+    .main-wrapper {
+        padding-top: 100px;
+    }
+
+    .glass-card.main-panel {
+        margin-bottom: 2rem;
+    }
 }
 
-.intent-badge {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 0.5rem 1rem;
-    border-radius: 50px;
-    font-weight: 500;
-    backdrop-filter: blur(5px);
+@media (max-width: 768px) {
+    h1.display-3 {
+        font-size: 2.5rem;
+    }
+
+    .settings-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
-/* 9. Landing Extra */
-.hero-box {
-    position: relative;
-    padding: 4rem 0;
-    text-align: center;
+/* 9. JavaScript Compatibility & Dynamic Elements */
+.fade-in-up {
+    animation: fadeUp 0.6s var(--ease-out) forwards;
 }
 
-.hero-stats {
-    display: inline-flex;
-    gap: 2rem;
-    margin-top: 2rem;
-    padding: 1rem 2rem;
-    border-radius: 50px;
+.history-item {
     background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: background 0.2s;
 }
 
-/* 10. Scrollbar */
-::-webkit-scrollbar {
-    width: 8px;
+.history-item:hover {
+    background: rgba(255, 255, 255, 0.06);
 }
 
-::-webkit-scrollbar-track {
-    background: var(--bg-deep);
+.history-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
 }
 
-::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
+.history-email-preview {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.85);
+    margin-bottom: 1rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-style: italic;
 }
 
-::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
+.history-results {
+    display: flex;
+    gap: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 0.75rem;
+}
+
+.history-result-section {
+    flex: 1;
+}
+
+.history-result-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+}
+
+.history-result-content {
+    font-size: 0.85rem;
+    font-weight: 500;
 }

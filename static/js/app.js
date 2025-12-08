@@ -620,6 +620,9 @@ class EmailWise {
         try {
             await navigator.clipboard.writeText(textContent);
 
+            // Premium Toast Notification
+            this.showToast('Copied to clipboard successfully!', 'success');
+
             // Visual feedback
             const icon = button.querySelector('i');
             const originalClass = icon.className;
@@ -632,7 +635,78 @@ class EmailWise {
 
         } catch (error) {
             console.error('Copy failed:', error);
+            this.showToast('Failed to copy text.', 'error');
         }
+    }
+
+    showToast(message, type = 'info') {
+        let container = document.querySelector('.toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.className = 'toast-container';
+            document.body.appendChild(container);
+        }
+
+        const toast = document.createElement('div');
+        toast.className = 'glass-toast';
+
+        let icon = 'fa-info-circle text-info';
+        if (type === 'success') icon = 'fa-check-circle text-success';
+        if (type === 'error') icon = 'fa-exclamation-circle text-danger';
+
+        toast.innerHTML = `
+            <i class="fas ${icon}"></i>
+            <span>${this.escapeHtml(message)}</span>
+        `;
+
+        container.appendChild(toast);
+
+        // Remove after 3s
+        setTimeout(() => {
+            toast.classList.add('hiding');
+            toast.addEventListener('animationend', () => {
+                toast.remove();
+            });
+        }, 3000);
+    }
+
+    displaySection(container, items, emptyMessage, iconClass) {
+        if (!items || items.length === 0) {
+            container.innerHTML = `
+                <div class="text-muted opacity-75 small fst-italic py-2">
+                    ${emptyMessage}
+                </div>
+            `;
+            return;
+        }
+
+        const isDeadlines = container.id === 'deadlinesContent';
+
+        const listItems = items
+            .filter(item => item && item.trim().length > 0)
+            .map((item, index) => {
+                let extraContent = '';
+                if (isDeadlines) {
+                    const encodedTitle = encodeURIComponent('Task Deadline: ' + item);
+                    const calUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodedTitle}`;
+                    extraContent = `<a href="${calUrl}" target="_blank" class="ms-auto btn btn-xs btn-outline-light-soft" title="Add to Google Calendar"><i class="fas fa-calendar-plus"></i></a>`;
+                }
+
+                // Staggered delay
+                const delay = index * 0.1;
+
+                return `
+                <div class="result-item stagger-item d-flex gap-2 align-items-start mb-2" style="animation-delay: ${delay}s">
+                    <div class="mt-1 text-primary opacity-75 flex-shrink-0">
+                        <i class="${iconClass}"></i>
+                    </div>
+                    <div class="flex-grow-1">${this.escapeHtml(item.trim())}</div>
+                    ${extraContent}
+                </div>
+            `})
+            .join('');
+
+        container.innerHTML = listItems;
     }
 
     getPlainTextFromElement(element) {
@@ -641,7 +715,6 @@ class EmailWise {
         if (resultItems.length > 0) {
             return Array.from(resultItems)
                 .map(item => {
-                    // Get text from the second div (the content div), skipping the icon div
                     const contentDiv = item.children[1];
                     return `• ${contentDiv.textContent.trim()}`;
                 })
@@ -653,10 +726,15 @@ class EmailWise {
 
     clearForm() {
         this.emailContent.value = '';
+        const fileList = document.getElementById('fileList');
+        if (fileList) fileList.innerHTML = '';
+
         this.updateCharacterCount();
         this.hideResults();
         this.hideError();
         this.emailContent.focus();
+
+        this.showToast('Form cleared.', 'info');
     }
 
     showLoading(show) {
@@ -674,8 +752,8 @@ class EmailWise {
     showError(message) {
         this.errorMessage.textContent = message;
         this.errorAlert.classList.remove('d-none');
-        // Small delay to allow display to update before adding opacity for fade-in
         setTimeout(() => this.errorAlert.classList.add('show'), 10);
+        this.showToast('Analysis failed. check errors.', 'error');
     }
 
     hideError() {
@@ -691,6 +769,13 @@ class EmailWise {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    updateCharacterCount() {
+        if (this.charCount) {
+            const count = this.emailContent.value.length;
+            this.charCount.textContent = count.toLocaleString();
+        }
     }
 }
 
